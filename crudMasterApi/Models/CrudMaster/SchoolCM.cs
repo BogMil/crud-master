@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using CrudMaster;
 using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Sorter;
-using crudMasterApi.Entities;
+using CrudMasterApi.Entities;
 using X.PagedList;
 
-namespace crudMasterApi.Models
+namespace CrudMasterApi.Models.CrudMaster
 {
     public class SchoolBase
     {
@@ -21,6 +22,7 @@ namespace crudMasterApi.Models
     public class SchoolQueryDto : SchoolBase
     {
         public CityQueryDto City { get; set; }
+        public List<ModuleQueryDto> Modules { get; set; }
     }
 
     public class SchoolCommandDto : SchoolBase
@@ -41,15 +43,16 @@ namespace crudMasterApi.Models
 
     public class SchoolPropertyMapper : GenericPropertyMapper<School, SchoolQueryDto>
     {
-        public override Expression<Func<School, dynamic>> GetPathInEfForDtoFieldExpression(string fieldName)
+        public override Expression<Func<School, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
         {
-            if (fieldName == GetDtoPropertyPathAsString(t => t.Id))
+
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Id))
                 return x => x.Id;
-            if (fieldName == GetDtoPropertyPathAsString(t => t.Mail))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Mail))
                 return x => x.Mail;
-            if (fieldName == GetDtoPropertyPathAsString(t => t.Name))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Name))
                 return x => x.Name;
-            if (fieldName == GetDtoPropertyPathAsString(t => t.CityId))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.CityId))
                 return x => x.City;
 
             throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
@@ -62,11 +65,12 @@ namespace crudMasterApi.Models
     {
         public SchoolMappingProfile()
         {
-            CreateMap<School, SchoolQueryDto>()
-                .ForMember(d => d.City, o => o.MapFrom(s => s.City));
+            CreateMap<School, SchoolQueryDto>();
+                //.ForMember(d => d.City, o => o.MapFrom(s => s.City));
 
             CreateMap<SchoolCommandDto, School>()
-                .ForMember(x => x.City, o => o.Ignore());
+                .ForMember(x => x.City, o => o.Ignore())
+                .ForMember(x => x.Modules, o => o.Ignore());
 
             CreateMap<PagedList<School>, StaticPagedList<SchoolQueryDto>>()
                 .ConvertUsing<PagedListConverter<School, SchoolQueryDto>>();

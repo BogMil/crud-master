@@ -43,7 +43,7 @@ namespace CrudMaster.Sorter
             if (orderByProperties.OrderByColumn != null)
             {
 
-                var x = PropertyMapper.GetPathInEfForDtoFieldExpression(orderByProperties.OrderByColumn);
+                var x = PropertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(orderByProperties.OrderByColumn);
                 OrderByProperty= x.GetExpressionBodyAsString();
                 var propName = x.GetExpressionBodyAsString();
                 TestPropertyInfo = PropertyTypeExtractor<TEntity>.GetPropertyInfo(propName);
@@ -60,7 +60,7 @@ namespace CrudMaster.Sorter
         {
             var defaultOrderByColumn = GetDefaultOrderByColumn();
             var defaultOrderByColumnPath = defaultOrderByColumn.GetExpressionBodyAsString();
-            return PropertyMapper.GetPathInEfForDtoFieldExpression(defaultOrderByColumnPath).Compile();
+            return PropertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(defaultOrderByColumnPath).Compile();
         }
 
         private PropertyInfo GetDefaultPropertyInfo()

@@ -2,7 +2,7 @@
 using AutoMapper;
 using X.PagedList;
 
-namespace crudMasterApi
+namespace CrudMasterApi
 {
     public class PagedListConverter<TSource, TDestination> : ITypeConverter<PagedList<TSource>, StaticPagedList<TDestination>>
     {

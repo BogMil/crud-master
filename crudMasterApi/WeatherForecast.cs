@@ -1,6 +1,6 @@
 using System;
 
-namespace crudMasterApi
+namespace CrudMasterApi
 {
     public class WeatherForecast
     {

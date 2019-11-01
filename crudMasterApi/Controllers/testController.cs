@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
-namespace crudMasterApi.Controllers
+namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

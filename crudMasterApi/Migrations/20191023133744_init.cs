@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace crudMasterApi.Migrations
+namespace CrudMasterApi.Migrations
 {
     public partial class init : Migration
     {
@@ -50,8 +50,7 @@ namespace crudMasterApi.Migrations
                         name: "FK_Schools_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -62,7 +61,8 @@ namespace crudMasterApi.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(maxLength: 200, nullable: true),
                     Principal = table.Column<string>(maxLength: 100, nullable: true),
-                    SchoolId = table.Column<int>(nullable: false)
+                    SchoolId = table.Column<int>(nullable: false),
+                    SchoolId1 = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -71,8 +71,13 @@ namespace crudMasterApi.Migrations
                         name: "FK_Modules_Schools_SchoolId",
                         column: x => x.SchoolId,
                         principalTable: "Schools",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Modules_Schools_SchoolId1",
+                        column: x => x.SchoolId1,
+                        principalTable: "Schools",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,25 +87,24 @@ namespace crudMasterApi.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdSubject = table.Column<int>(maxLength: 200, nullable: false),
-                    SubjectId = table.Column<int>(nullable: true),
-                    IdModule = table.Column<int>(nullable: false),
-                    ModuleId = table.Column<int>(nullable: true)
+                    IdModule = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ModuleSubjects", x => x.Id);
+                    table.UniqueConstraint("AK_ModuleSubjects_IdModule_IdSubject", x => new { x.IdModule, x.IdSubject });
                     table.ForeignKey(
-                        name: "FK_ModuleSubjects_Modules_ModuleId",
-                        column: x => x.ModuleId,
+                        name: "FK_ModuleSubjects_Modules_IdModule",
+                        column: x => x.IdModule,
                         principalTable: "Modules",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ModuleSubjects_Subjects_SubjectId",
-                        column: x => x.SubjectId,
+                        name: "FK_ModuleSubjects_Subjects_IdSubject",
+                        column: x => x.IdSubject,
                         principalTable: "Subjects",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -116,6 +120,17 @@ namespace crudMasterApi.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Subjects",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Electrotehnics" },
+                    { 2, "Physics" },
+                    { 3, "English" },
+                    { 4, "Maths" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Schools",
                 columns: new[] { "Id", "CityId", "Mail", "Name" },
                 values: new object[,]
@@ -127,20 +142,43 @@ namespace crudMasterApi.Migrations
                     { 4, 3, "gimeko@yahoo.com", "Gimnazija i ekonomska škola Branko Radičević" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Modules",
+                columns: new[] { "Id", "Name", "Principal", "SchoolId", "SchoolId1" },
+                values: new object[,]
+                {
+                    { 1, "Electrotehnical engineering", "Jane Doe", 1, null },
+                    { 4, "Electrotehnical engineering", "Johny Noxvile", 1, null },
+                    { 5, "Electrotehnical engineering", "Partic Star", 1, null },
+                    { 2, "Electrotehnical engineering", "John Doe", 2, null },
+                    { 3, "Electrotehnical engineering", "Marc Skimet", 3, null }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ModuleSubjects",
+                columns: new[] { "Id", "IdModule", "IdSubject" },
+                values: new object[,]
+                {
+                    { 2, 1, 1 },
+                    { 1, 2, 1 },
+                    { 3, 3, 1 },
+                    { 4, 3, 3 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Modules_SchoolId",
                 table: "Modules",
                 column: "SchoolId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModuleSubjects_ModuleId",
-                table: "ModuleSubjects",
-                column: "ModuleId");
+                name: "IX_Modules_SchoolId1",
+                table: "Modules",
+                column: "SchoolId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ModuleSubjects_SubjectId",
+                name: "IX_ModuleSubjects_IdSubject",
                 table: "ModuleSubjects",
-                column: "SubjectId");
+                column: "IdSubject");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Schools_CityId",

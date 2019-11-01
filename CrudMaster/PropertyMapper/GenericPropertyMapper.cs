@@ -6,11 +6,14 @@ namespace CrudMaster.PropertyMapper
     public abstract class GenericPropertyMapper<TEntity,TQueryDto> : IPropertyMapper<TEntity> 
         where TEntity : class
     {
-        public abstract Expression<Func<TEntity, dynamic>> GetPathInEfForDtoFieldExpression(string dtoFieldName);
+        public abstract Expression<Func<TEntity, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string dtoFieldName);
 
-        public string GetDtoPropertyPathAsString(Expression<Func<TQueryDto, dynamic>> exp)
-        {
-            return exp.GetExpressionBodyAsString();
-        }
+        /// <summary>
+        /// Function returns expresion body withoud expression parameter as string
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <returns>string</returns>
+        public string GetExpressionBodyWithoutParameter(Expression<Func<TQueryDto, dynamic>> exp) => exp.GetExpressionBodyAsString();
+        
     }
 }

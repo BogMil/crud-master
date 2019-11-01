@@ -1,9 +1,9 @@
 using CrudMaster.Controller;
-using crudMasterApi.Models;
-using crudMasterApi.Services.CRUD.Interfaces;
+using CrudMasterApi.Models.CrudMaster;
+using CrudMasterApi.Services.CrudMaster;
 using Microsoft.AspNetCore.Mvc;
 
-namespace crudMasterApi.Controllers
+namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

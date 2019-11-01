@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 
-namespace crudMasterApi.Controllers
+namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     public class SampleDataController : Controller

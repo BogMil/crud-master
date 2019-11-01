@@ -1,7 +1,8 @@
-﻿using AutoMapper;
-using crudMasterApi.Models;
+﻿using System.Reflection;
+using AutoMapper;
+using CrudMasterApi.Models.CrudMaster;
 
-namespace crudMasterApi
+namespace CrudMasterApi
 {
     public class AutoMapperConfiguration 
     {
@@ -11,9 +12,7 @@ namespace crudMasterApi
             (
                 cfg =>
                 {
-                   
-                    cfg.AddProfile<CityMappingProfile>();
-                    cfg.AddProfile<SchoolMappingProfile>();
+                    cfg.AddMaps(Assembly.GetExecutingAssembly());
                 }
             );
             config.AssertConfigurationIsValid();

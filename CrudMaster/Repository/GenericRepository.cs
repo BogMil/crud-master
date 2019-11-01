@@ -69,10 +69,10 @@ namespace CrudMaster.Repository
 
         protected IPagedList<TEntity> Paged(IEnumerable<TEntity> listOfEntities, Pager pager)
         {
-            if (pager.NumberOfRowsToDisplay < 0)
+            if (pager.NumOfRowsPerPage < 0)
                 return listOfEntities.ToPagedList();
 
-            return listOfEntities.ToPagedList(pager.CurrentPageNumber, pager.NumberOfRowsToDisplay);
+            return listOfEntities.ToPagedList(pager.CurrentPageNumber, pager.NumOfRowsPerPage);
         }
 
         public virtual void Create(TEntity entity)
@@ -117,7 +117,7 @@ namespace CrudMaster.Repository
 
         public virtual object GetPrimaryKeyValue(TEntity entity)
         {
-            var PKName = Db.Entry(entity)
+            var pkName = Db.Entry(entity)
                 .Metadata
                 .FindPrimaryKey()
                 .Properties
@@ -127,7 +127,7 @@ namespace CrudMaster.Repository
                 .ToString();
 
 
-            return entity.GetType().GetProperty(PKName).GetValue(entity);
+            return entity.GetType().GetProperty(pkName)?.GetValue(entity);
         }
     }
 }

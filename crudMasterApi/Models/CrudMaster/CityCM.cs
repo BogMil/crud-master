@@ -5,10 +5,10 @@ using CrudMaster;
 using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Sorter;
-using crudMasterApi.Entities;
+using CrudMasterApi.Entities;
 using X.PagedList;
 
-namespace crudMasterApi.Models
+namespace CrudMasterApi.Models.CrudMaster
 {
     public class CityBase
     {
@@ -39,13 +39,13 @@ namespace crudMasterApi.Models
 
     public class CityPropertyMapper : GenericPropertyMapper<City, CityQueryDto>
     {
-        public override Expression<Func<City, dynamic>> GetPathInEfForDtoFieldExpression(string fieldName)
+        public override Expression<Func<City, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
         {
-            if (fieldName == GetDtoPropertyPathAsString(t => t.Id))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Id)) 
                 return x => x.Id;
-            if (fieldName == GetDtoPropertyPathAsString(t => t.Name))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Name))
                 return x => x.Name;
-            if (fieldName == GetDtoPropertyPathAsString(t => t.PostalCode))
+            if (fieldName == GetExpressionBodyWithoutParameter(t => t.PostalCode))
                 return x => x.PostalCode;
 
             throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +

@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace crudMasterApi.Entities
+namespace CrudMasterApi.Entities
 {
     public class ModuleSubject
     {
@@ -16,19 +17,14 @@ namespace crudMasterApi.Entities
         public virtual Module Module { get; set; }
     }
 
-    public static class ModuleSubjectCreator
+    public class ModuleSubjectModelCreator : IEntityTypeConfiguration<ModuleSubject>
     {
-        public static void OnModelCreating(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<ModuleSubject> builder)
         {
-            modelBuilder.Entity<ModuleSubject>().HasKey(e => e.Id);
-            modelBuilder.Entity<ModuleSubject>().Property(e => e.Id).ValueGeneratedOnAdd();
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<ModuleSubject>().HasKey(ms => new {ms.IdModule, ms.IdSubject});
-
-            modelBuilder.Entity<ModuleSubject>().HasOne<Subject>().WithMany(s=>s.ModulesOfSubject).HasForeignKey(ms => ms.IdSubject);
-            modelBuilder.Entity<ModuleSubject>().HasOne<Module>().WithMany(s=>s.SubjectsOfModule).HasForeignKey(ms=>ms.IdModule);
-
-            modelBuilder.Entity<ModuleSubject>().HasData(
+            builder.HasData(
                 new ModuleSubject
                 {
                     Id = 1,
@@ -43,11 +39,13 @@ namespace crudMasterApi.Entities
                 },
                 new ModuleSubject
                 {
+                    Id = 3,
                     IdSubject = 1,
                     IdModule = 3
                 },
                 new ModuleSubject
                 {
+                    Id = 4,
                     IdSubject = 3,
                     IdModule = 3
                 }

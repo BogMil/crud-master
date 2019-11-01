@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace crudMasterApi.Entities
+namespace CrudMasterApi.Entities
 {
     public class School
     {
@@ -15,18 +17,20 @@ namespace crudMasterApi.Entities
         public string Mail { get; set; }
         public int CityId { get; set; }
         public virtual City City { get; set; }
+
+        public virtual ICollection<Module> Modules{ get; set; }
     }
 
-    public static class SchoolCreator
+    public class SchoolModelCreator : IEntityTypeConfiguration<School>
     {
-        public static void OnModelCreating(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<School> builder)
         {
-            modelBuilder.Entity<School>().HasKey(e => e.Id);
-            modelBuilder.Entity<School>().Property(e => e.Id).ValueGeneratedOnAdd();
-            //modelBuilder.Entity<School>().HasOne<City>();
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
+            //builder.HasOne<City>();
 
 
-            modelBuilder.Entity<School>().HasData(
+            builder.HasData(
                 new School
                 {
                     Id = 1,

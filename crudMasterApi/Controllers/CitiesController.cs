@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using crudMasterApi.Entities;
-using Microsoft.AspNetCore.Http;
+using CrudMasterApi.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace crudMasterApi.Controllers
+namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

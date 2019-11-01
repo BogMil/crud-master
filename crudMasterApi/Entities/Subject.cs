@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace crudMasterApi.Entities
+namespace CrudMasterApi.Entities
 {
     public class Subject
     {
@@ -16,14 +17,14 @@ namespace crudMasterApi.Entities
         public virtual ICollection<ModuleSubject> ModulesOfSubject { get; set; }
     }
 
-    public static class SubjectCreator
+    public class SubjectModelCreator : IEntityTypeConfiguration<Subject>
     {
-        public static void OnModelCreating(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<Subject> builder)
         {
-            modelBuilder.Entity<Subject>().HasKey(e => e.Id);
-            modelBuilder.Entity<Subject>().Property(e => e.Id).ValueGeneratedOnAdd();
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<Subject>().HasData(
+            builder.HasData(
                 new Subject
                 {
                     Id = 1,

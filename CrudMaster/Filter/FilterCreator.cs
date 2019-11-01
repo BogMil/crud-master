@@ -96,7 +96,7 @@ namespace CrudMaster.Filter
         private string GetEfPropertyPathByDtoField(string dtoField)
         {
             var propertyMapper = new TPropertyMapper();
-            var expresisonMember = propertyMapper.GetPathInEfForDtoFieldExpression(dtoField);
+            var expresisonMember = propertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoField);
             return expresisonMember.GetExpressionBodyAsString();
         }
 

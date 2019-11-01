@@ -1,23 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using crudMasterApi.Entities;
-using crudMasterApi.Repositories;
-using crudMasterApi.Repositories.Interfaces;
-using crudMasterApi.Services.CRUD;
-using crudMasterApi.Services.CRUD.Interfaces;
+using CrudMasterApi.Entities;
+using CrudMasterApi.Repositories;
+using CrudMasterApi.Services.CrudMaster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
-namespace crudMasterApi
+namespace CrudMasterApi
 {
     public class Startup
     {
@@ -32,12 +25,19 @@ namespace crudMasterApi
         public void ConfigureServices(IServiceCollection services)
         {
 
-            //services.AddMvc();
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
+
             services.AddMvc()
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
             services.AddSingleton(new AutoMapperConfiguration().Configure().CreateMapper());
+            services.AddSingleton<TranslationTransformer>();
 
             services.AddDbContext<AccountingContext>(options => options.UseLazyLoadingProxies().UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
 
@@ -58,6 +58,8 @@ namespace crudMasterApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors("MyPolicy");
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -66,6 +68,7 @@ namespace crudMasterApi
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDynamicControllerRoute<TranslationTransformer>("{language}/{controller}/{action}");
                 endpoints.MapControllers();
             });
         }

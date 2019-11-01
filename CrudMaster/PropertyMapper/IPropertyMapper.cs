@@ -5,6 +5,6 @@ namespace CrudMaster.PropertyMapper
 {
     public interface IPropertyMapper<TEntity> where TEntity:class
     {
-        Expression<Func<TEntity, dynamic>> GetPathInEfForDtoFieldExpression(string dtoFieldName);
+        Expression<Func<TEntity, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string dtoFieldName);
     }
 }

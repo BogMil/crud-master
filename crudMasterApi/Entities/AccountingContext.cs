@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace crudMasterApi.Entities
+namespace CrudMasterApi.Entities
 {
     public class AccountingContext : DbContext
     {
@@ -25,12 +25,18 @@ namespace crudMasterApi.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //var properties = this.GetType().GetProperties();
+            modelBuilder.Entity<City>().HasMany(e => e.Schools).WithOne(x => x.City).HasForeignKey(x => x.CityId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<School>().HasMany(e => e.Modules).WithOne(x => x.School).HasForeignKey(x => x.SchoolId).OnDelete(DeleteBehavior.NoAction);
 
 
+            modelBuilder.Entity<ModuleSubject>().HasKey(ms => new { ms.IdModule, ms.IdSubject });
+            modelBuilder.Entity<ModuleSubject>().HasOne(x=>x.Subject).WithMany(s => s.ModulesOfSubject).HasForeignKey(ms => ms.IdSubject);
+            modelBuilder.Entity<ModuleSubject>().HasOne(s=>s.Module).WithMany(s => s.SubjectsOfModule).HasForeignKey(ms => ms.IdModule);
 
-            CityCreator.OnModelCreating(modelBuilder);
-            SchoolCreator.OnModelCreating(modelBuilder);
+
+            modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+
         }
     }
 }

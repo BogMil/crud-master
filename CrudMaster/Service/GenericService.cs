@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using CrudMaster.Repository;
 using CrudMaster.Sorter;
+using Microsoft.AspNetCore.Http;
 using X.PagedList;
 
 namespace CrudMaster.Service

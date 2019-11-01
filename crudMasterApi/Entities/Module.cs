@@ -1,12 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace crudMasterApi.Entities
+namespace CrudMasterApi.Entities
 {
     public class Module
     {
@@ -23,15 +21,15 @@ namespace crudMasterApi.Entities
         public virtual ICollection<ModuleSubject> SubjectsOfModule { get; set; }
     }
 
-    public static class ModuleCreator
+    public class ModuleModelCreator : IEntityTypeConfiguration<Module>
     {
-        public static void OnModelCreating(ModelBuilder modelBuilder)
+        public void Configure(EntityTypeBuilder<Module> builder)
         {
-            modelBuilder.Entity<Module>().HasKey(e => e.Id);
-            modelBuilder.Entity<Module>().Property(e => e.Id).ValueGeneratedOnAdd();
-            modelBuilder.Entity<Module>().HasOne<School>();
+            builder.HasKey(e => e.Id);
+            builder.Property(e => e.Id).ValueGeneratedOnAdd();
+            builder.HasOne<School>();
 
-            modelBuilder.Entity<Module>().HasData(
+            builder.HasData(
                 new Module
                 {
                     Id = 1,

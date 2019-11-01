@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29411.108
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "crudMasterApi", "crudMasterApi\crudMasterApi.csproj", "{07874E13-F0F7-43A2-9819-E29316510942}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMasterApi", "crudMasterApi\CrudMasterApi.csproj", "{07874E13-F0F7-43A2-9819-E29316510942}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMaster", "CrudMaster\CrudMaster.csproj", "{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}"
 EndProject
