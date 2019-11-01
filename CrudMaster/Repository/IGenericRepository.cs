@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using CrudMaster.Sorter;
 using X.PagedList;
@@ -21,5 +22,7 @@ namespace CrudMaster.Repository
         Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
 
         TEntity NewDbSet();
+        Dictionary<string, string> OptionsForForeignKey(string fkName,string colName);
+
     }
 }

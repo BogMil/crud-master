@@ -26,6 +26,5 @@ namespace CrudMaster.Filter
 
             return WherePredicate;
         }
-
     }
 }

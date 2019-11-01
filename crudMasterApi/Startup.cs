@@ -68,7 +68,7 @@ namespace CrudMasterApi
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapDynamicControllerRoute<TranslationTransformer>("{language}/{controller}/{action}");
+                //endpoints.MapDynamicControllerRoute<TranslationTransformer>("{language}/{controller}/{action}");
                 endpoints.MapControllers();
             });
         }

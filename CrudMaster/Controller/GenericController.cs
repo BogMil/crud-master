@@ -25,6 +25,14 @@ namespace CrudMaster.Controller
         }
 
         [HttpGet]
+        [Route("OptionsForForeignKey")]
+        public virtual ActionResult OptionsForForeignKey(string fkName,string colName)
+        {
+            var data = Service.OptionsForForeignKey(fkName, colName);
+            return Ok(data);
+        }
+
+        [HttpGet]
         public virtual ActionResult Get([FromQuery] Pager pager, [FromQuery] OrderByProperties orderByProperties, [FromQuery] string filters)
         {
             var data = Service.GetJqGridData(pager, filters, orderByProperties);

@@ -10,9 +10,6 @@ namespace CrudMasterApi.Controllers
     public class SchoolController :
             GenericController<ISchoolService, SchoolViewModel, SchoolQueryDto, SchoolCommandDto>
     {
-        public SchoolController(ISchoolService service) : base(service)
-        {
-
-        }
+        public SchoolController(ISchoolService service) : base(service) { }
     }
 }

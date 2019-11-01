@@ -2,19 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using CrudMaster.Filter;
+using CrudMaster.PropertyMapper;
 using CrudMaster.Sorter;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using X.PagedList;
 
 namespace CrudMaster.Repository
 {
-    public abstract class GenericRepository<TEntity, TContext, TOrderByPredicateCreator, TFilterPredicateCreator> :
+    public abstract class GenericRepository<TEntity, TContext, TOrderByPredicateCreator, TFilterPredicateCreator, TPropertyMapper> :
+
         IGenericRepository<TEntity>
         where TEntity : class
         where TContext : DbContext
         where TOrderByPredicateCreator : IOrderByPredicateCreator<TEntity>, new()
         where TFilterPredicateCreator : IWherePredicateCreator<TEntity>, new()
+        where TPropertyMapper : class, IPropertyMapper<TEntity>, new()
     {
         public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
@@ -26,6 +33,45 @@ namespace CrudMaster.Repository
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
+        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string colName)
+        {
+            var assemblyOfDb = Db.GetType().Assembly;
+            var typesThatImplementsPropertyMapperInterfaceOfTEntity =
+                assemblyOfDb.GetTypesThatImplements(typeof(IPropertyMapper<>), new List<Type>() { typeof(TEntity) });
+
+            IPropertyMapper<TEntity> proppertyMapper;
+            if (typesThatImplementsPropertyMapperInterfaceOfTEntity.Count == 1)
+                proppertyMapper = (IPropertyMapper<TEntity>)Activator.CreateInstance(typesThatImplementsPropertyMapperInterfaceOfTEntity.First());
+            else
+                throw new Exception("PropertyMapper not implemented for entity" + typeof(TEntity));
+
+
+            var fkExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(fkDto);
+            var fkAsString = fkExpression.GetExpressionBodyAsString();
+
+            var colNameExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
+            var colNameAsString = colNameExpression.GetExpressionBodyAsString();
+
+            var allFks = Db.Model.FindEntityType(typeof(TEntity)).GetForeignKeys();
+
+            var fkEntity = allFks.Single(s => s.Properties.Select(d => d.Name).Contains(fkAsString));
+            var nameOfLinkedTable = fkEntity.PrincipalEntityType.Name;
+
+
+            var linkedTableType = assemblyOfDb.GetType(nameOfLinkedTable);
+            var dbSetOflinkedTable = (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType).Invoke(Db, null);
+
+            var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
+
+            var res = dbSetOflinkedTable.Select(x =>
+                new KeyValuePair<string, string>(
+                    x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
+                    x.GetType().GetProperty(colNameAsString).GetValue(x).ToString()
+                )
+            ).ToList();
+            return res.ToDictionary(x=>x.Key,x=>x.Value);
+        }
+
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);
 
         public virtual int DeleteAndReturn(int id)
@@ -113,7 +159,7 @@ namespace CrudMaster.Repository
 
         protected virtual TEntity ModifyUpdateSourceEntityBeforeUpdate(TEntity updateSourceEntity, TEntity oldEntity) => updateSourceEntity;
 
-        protected virtual void ShouldDeleteEntity(TEntity entity){}
+        protected virtual void ShouldDeleteEntity(TEntity entity) { }
 
         public virtual object GetPrimaryKeyValue(TEntity entity)
         {

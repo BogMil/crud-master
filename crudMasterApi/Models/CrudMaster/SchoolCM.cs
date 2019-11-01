@@ -53,7 +53,7 @@ namespace CrudMasterApi.Models.CrudMaster
             if (fieldName == GetExpressionBodyWithoutParameter(t => t.Name))
                 return x => x.Name;
             if (fieldName == GetExpressionBodyWithoutParameter(t => t.CityId))
-                return x => x.City;
+                return x => x.CityId;
 
             throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
             "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
