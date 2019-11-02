@@ -74,43 +74,44 @@ namespace CrudMaster.Repository
             else
                 throw new Exception("PropertyMapper not implemented for entity" + typeof(TEntity));
 
-            
-            var i = 0;
+
+            //var i = 0;
             var colNames = templateWithColumnNames.GetColumnNames();
             var matches = templateWithColumnNames.Matches;
-            var mappedColnamesAsStrings = new string[colNames.Length];
+            //var mappedColnamesAsStrings = new string[colNames.Length];
 
-            var templateToMappedColNameDictionary = new Dictionary<string,string>();
+            var templateToMappedColNameDictionary = new Dictionary<string, string>();
 
             foreach (Match match in matches)
             {
                 var dtoColName = match.Groups[1].Value;
                 var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoColName);
                 var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
-                templateToMappedColNameDictionary.Add(dtoColName, colNameAsString);
+                if (!templateToMappedColNameDictionary.ContainsKey(dtoColName))
+                    templateToMappedColNameDictionary.Add(dtoColName, colNameAsString);
             }
 
-            foreach (var colName in colNames)
-            {
-                var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
-                var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
-                mappedColnamesAsStrings[i] = colNameAsString;
-                i++;
-            }
+            //foreach (var colName in colNames)
+            //{
+            //    var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
+            //    var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
+            //    mappedColnamesAsStrings[i] = colNameAsString;
+            //    i++;
+            //}
 
             var res = dbSetOflinkedTable.Select(x =>
                 new KeyValuePair<string, string>(
                     x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
-                    templateWithColumnNames.Replace(x,templateToMappedColNameDictionary)
-                    //ConcatColValues(x, mappedColnamesAsStrings, concatenator)
+                    templateWithColumnNames.Replace(x, templateToMappedColNameDictionary)
+                //ConcatColValues(x, mappedColnamesAsStrings, concatenator)
                 )
             ).ToList();
-            return res?.ToDictionary(x=>x.Key,x=>x.Value);
+            return res?.ToDictionary(x => x.Key, x => x.Value);
         }
 
         private static string ConcatColValues(object entity, IReadOnlyCollection<string> colNames, string concatenator)
         {
-            var colValues=new string[colNames.Count];
+            var colValues = new string[colNames.Count];
             var i = 0;
             foreach (var colName in colNames)
             {

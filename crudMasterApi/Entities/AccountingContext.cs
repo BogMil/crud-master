@@ -25,7 +25,17 @@ namespace CrudMasterApi.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<City>().HasMany(e => e.Schools).WithOne(x => x.City).HasForeignKey(x => x.CityId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Region>()
+                .HasMany(e => e.Cities)
+                .WithOne(x => x.Region)
+                .HasForeignKey(x => x.RegionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<City>()
+                .HasMany(e => e.Schools)
+                .WithOne(x => x.City)
+                .HasForeignKey(x => x.CityId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<School>().HasMany(e => e.Modules).WithOne(x => x.School).HasForeignKey(x => x.SchoolId).OnDelete(DeleteBehavior.NoAction);
 

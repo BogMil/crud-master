@@ -10,8 +10,6 @@ namespace CrudMasterApi.Controllers
     public class CityController :
             GenericController<ICityService, CityViewModel, CityQueryDto, CityCommandDto>
     {
-        public CityController(ICityService service) : base(service)
-        {
-        }
+        public CityController(ICityService service) : base(service) {}
     }
 }
