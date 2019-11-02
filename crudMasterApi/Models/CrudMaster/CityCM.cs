@@ -41,11 +41,12 @@ namespace CrudMasterApi.Models.CrudMaster
     {
         public override Expression<Func<City, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
         {
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Id)) 
+            fieldName = fieldName.ToLower();
+            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id)) 
                 return x => x.Id;
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Name))
+            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Name))
                 return x => x.Name;
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.PostalCode))
+            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.PostalCode))
                 return x => x.PostalCode;
 
             throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +

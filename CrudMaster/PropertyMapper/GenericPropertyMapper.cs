@@ -14,6 +14,7 @@ namespace CrudMaster.PropertyMapper
         /// <param name="exp"></param>
         /// <returns>string</returns>
         public string GetExpressionBodyWithoutParameter(Expression<Func<TQueryDto, dynamic>> exp) => exp.GetExpressionBodyAsString();
-        
+        public string GetExpressionBodyWithoutParameterToLower(Expression<Func<TQueryDto, dynamic>> exp) => exp.GetExpressionBodyAsString().ToLower();
+
     }
 }

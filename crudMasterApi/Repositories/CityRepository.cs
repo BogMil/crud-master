@@ -9,7 +9,7 @@ namespace CrudMasterApi.Repositories
 
     }
     public class CityRepository : 
-			GenericRepository<City,AccountingContext,CityOrderByPredicateCreator,CityWherePredicateCreator,CityPropertyMapper>,
+			GenericRepository<City,AccountingContext,CityOrderByPredicateCreator,CityWherePredicateCreator>,
 		ICityRepository
 	{
 	    public CityRepository(AccountingContext context) : base(context)

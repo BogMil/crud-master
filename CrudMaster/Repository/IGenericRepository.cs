@@ -22,7 +22,8 @@ namespace CrudMaster.Repository
         Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
 
         TEntity NewDbSet();
-        Dictionary<string, string> OptionsForForeignKey(string fkName,string colName);
+        Dictionary<string, string> OptionsForForeignKey(string fkDto, string[] colNames, string concatenator);
+
 
     }
 }

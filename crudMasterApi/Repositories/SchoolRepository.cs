@@ -7,7 +7,7 @@ namespace CrudMasterApi.Repositories
     public interface ISchoolRepository : IGenericRepository<School> { }
 
     public class SchoolRepository :
-            GenericRepository<School, AccountingContext, SchoolOrderByPredicateCreator, SchoolWherePredicateCreator,SchoolPropertyMapper>,
+            GenericRepository<School, AccountingContext, SchoolOrderByPredicateCreator, SchoolWherePredicateCreator>,
 		ISchoolRepository
 	{
         public SchoolRepository(AccountingContext context) : base(context) { }

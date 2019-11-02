@@ -14,14 +14,13 @@ using X.PagedList;
 
 namespace CrudMaster.Repository
 {
-    public abstract class GenericRepository<TEntity, TContext, TOrderByPredicateCreator, TFilterPredicateCreator, TPropertyMapper> :
+    public abstract class GenericRepository<TEntity, TContext, TOrderByPredicateCreator, TFilterPredicateCreator> :
 
         IGenericRepository<TEntity>
         where TEntity : class
         where TContext : DbContext
         where TOrderByPredicateCreator : IOrderByPredicateCreator<TEntity>, new()
         where TFilterPredicateCreator : IWherePredicateCreator<TEntity>, new()
-        where TPropertyMapper : class, IPropertyMapper<TEntity>, new()
     {
         public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
@@ -33,7 +32,7 @@ namespace CrudMaster.Repository
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
-        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string colName)
+        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string[] colNames,string concatenator)
         {
             var assemblyOfDb = Db.GetType().Assembly;
             var typesThatImplementsPropertyMapperInterfaceOfTEntity =
@@ -49,8 +48,8 @@ namespace CrudMaster.Repository
             var fkExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(fkDto);
             var fkAsString = fkExpression.GetExpressionBodyAsString();
 
-            var colNameExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
-            var colNameAsString = colNameExpression.GetExpressionBodyAsString();
+            
+            
 
             var allFks = Db.Model.FindEntityType(typeof(TEntity)).GetForeignKeys();
 
@@ -63,13 +62,52 @@ namespace CrudMaster.Repository
 
             var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
 
+            dynamic linkedTableProppertyMapper;
+            var z = typeof(IPropertyMapper<>).MakeGenericType(linkedTableType);
+
+            var typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity =
+                assemblyOfDb.GetTypesThatImplements(typeof(IPropertyMapper<>), new List<Type>() { linkedTableType });
+
+            if (typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.Count == 1)
+                linkedTableProppertyMapper = Activator.CreateInstance(typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.First());
+            else
+                throw new Exception("PropertyMapper not implemented for entity" + typeof(TEntity));
+
+            
+            var i = 0;
+            var mappedColnamesAsStrings = new string[colNames.Length];
+
+            //var x = typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.First().MakeGenericType(linkedTableType);
+            
+            foreach (var colName in colNames)
+            {
+                var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
+                var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
+                mappedColnamesAsStrings[i] = colNameAsString;
+                i++;
+            }
+
             var res = dbSetOflinkedTable.Select(x =>
                 new KeyValuePair<string, string>(
                     x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
-                    x.GetType().GetProperty(colNameAsString).GetValue(x).ToString()
+                    //x.GetType().GetProperty(colNameAsString).GetValue(x).ToString()
+                    ConcatColValues(x, mappedColnamesAsStrings, concatenator)
                 )
             ).ToList();
-            return res.ToDictionary(x=>x.Key,x=>x.Value);
+            return res?.ToDictionary(x=>x.Key,x=>x.Value);
+        }
+
+        private static string ConcatColValues(object entity, IReadOnlyCollection<string> colNames, string concatenator)
+        {
+            var colValues=new string[colNames.Count];
+            var i = 0;
+            foreach (var colName in colNames)
+            {
+                colValues[i] = entity.GetType().GetProperty(colName)?.GetValue(entity).ToString();
+                i++;
+            }
+
+            return colValues.Join(concatenator);
         }
 
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);

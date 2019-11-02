@@ -24,11 +24,12 @@ namespace CrudMaster.Controller
             Service = service;
         }
 
-        [HttpGet]
-        [Route("OptionsForForeignKey")]
-        public virtual ActionResult OptionsForForeignKey(string fkName,string colName)
+        [HttpGet("[action]")]
+        //[Route("OptionsForForeignKey")]
+        public virtual ActionResult OptionsForForeignKey(string fkName,string colNames,string concatenator=" ")
         {
-            var data = Service.OptionsForForeignKey(fkName, colName);
+            var colNamesArray = colNames.Split(".").ToArray();
+            var data = Service.OptionsForForeignKey(fkName, colNamesArray,concatenator);
             return Ok(data);
         }
 

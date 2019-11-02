@@ -15,6 +15,14 @@ namespace CrudMaster
             return expressionBodyAsString;
         }
 
+        public static string NonExtenionGetExpressionBodyAsString<T, TProperty>(Expression<Func<T, TProperty>> exp)
+        {
+            var expressionBody = exp.Body;
+            var expressionBodyProperties = GetStackOfExpressionBodyProperties(expressionBody);
+            var expressionBodyAsString = string.Join(".", expressionBodyProperties.ToArray());
+            return expressionBodyAsString;
+        }
+
         private static Stack<string> GetStackOfExpressionBodyProperties(Expression expression)
         {
             var propertyNames = new Stack<string>();

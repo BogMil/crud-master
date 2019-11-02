@@ -37,9 +37,9 @@ namespace CrudMaster.Service
             return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
         }
 
-        public Dictionary<string, string> OptionsForForeignKey(string fkName,string colName)
+        public Dictionary<string, string> OptionsForForeignKey(string fkName,string[] colNames,string concatenator)
         {
-            return Repository.OptionsForForeignKey(fkName,colName);
+            return Repository.OptionsForForeignKey(fkName,colNames, concatenator);
         }
 
         protected virtual IPagedList<TEntity> GetListOfEntites(Pager pager, string filters, OrderByProperties orderByProperties)
