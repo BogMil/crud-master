@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Sorter;
@@ -32,8 +33,10 @@ namespace CrudMaster.Repository
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
-        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string[] colNames,string concatenator)
+        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string template, string concatenator)
         {
+            var templateWithColumnNames = new TemplateWithColumnNames(template);
+
             var assemblyOfDb = Db.GetType().Assembly;
             var typesThatImplementsPropertyMapperInterfaceOfTEntity =
                 assemblyOfDb.GetTypesThatImplements(typeof(IPropertyMapper<>), new List<Type>() { typeof(TEntity) });
@@ -48,8 +51,6 @@ namespace CrudMaster.Repository
             var fkExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(fkDto);
             var fkAsString = fkExpression.GetExpressionBodyAsString();
 
-            
-            
 
             var allFks = Db.Model.FindEntityType(typeof(TEntity)).GetForeignKeys();
 
@@ -75,10 +76,20 @@ namespace CrudMaster.Repository
 
             
             var i = 0;
+            var colNames = templateWithColumnNames.GetColumnNames();
+            var matches = templateWithColumnNames.Matches;
             var mappedColnamesAsStrings = new string[colNames.Length];
 
-            //var x = typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.First().MakeGenericType(linkedTableType);
-            
+            var templateToMappedColNameDictionary = new Dictionary<string,string>();
+
+            foreach (Match match in matches)
+            {
+                var dtoColName = match.Groups[1].Value;
+                var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoColName);
+                var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
+                templateToMappedColNameDictionary.Add(dtoColName, colNameAsString);
+            }
+
             foreach (var colName in colNames)
             {
                 var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
@@ -90,8 +101,8 @@ namespace CrudMaster.Repository
             var res = dbSetOflinkedTable.Select(x =>
                 new KeyValuePair<string, string>(
                     x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
-                    //x.GetType().GetProperty(colNameAsString).GetValue(x).ToString()
-                    ConcatColValues(x, mappedColnamesAsStrings, concatenator)
+                    templateWithColumnNames.Replace(x,templateToMappedColNameDictionary)
+                    //ConcatColValues(x, mappedColnamesAsStrings, concatenator)
                 )
             ).ToList();
             return res?.ToDictionary(x=>x.Key,x=>x.Value);

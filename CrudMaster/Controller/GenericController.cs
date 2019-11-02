@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using CrudMaster.Service;
 using CrudMaster.Sorter;
 using Microsoft.AspNetCore.Http;
@@ -25,12 +26,23 @@ namespace CrudMaster.Controller
         }
 
         [HttpGet("[action]")]
-        //[Route("OptionsForForeignKey")]
-        public virtual ActionResult OptionsForForeignKey(string fkName,string colNames,string concatenator=" ")
+        public virtual ActionResult OptionsForForeignKey(string fkName,string template,string concatenator=" ")
         {
-            var colNamesArray = colNames.Split(".").ToArray();
-            var data = Service.OptionsForForeignKey(fkName, colNamesArray,concatenator);
+            var data = Service.OptionsForForeignKey(fkName, template,concatenator);
             return Ok(data);
+        }
+
+        public string LowerizeColumnNamesInTemplate(string template)
+        {
+            var regex = new Regex(@"\${(.*?)}");
+            var matches = regex.Matches(template);
+
+            foreach (Match match in matches)
+            {
+                template = template.Replace(match.Value, match.Value.ToLower());
+            }
+
+            return template;
         }
 
         [HttpGet]
