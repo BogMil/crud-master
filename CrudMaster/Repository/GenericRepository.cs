@@ -4,8 +4,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using AutoMapper;
 using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
+using CrudMaster.Service;
 using CrudMaster.Sorter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -26,20 +28,38 @@ namespace CrudMaster.Repository
         public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
 
-
-        protected GenericRepository(TContext context)
+        protected IMapper Mapper;
+        protected GenericRepository(TContext context, IMapper mapper)
         {
             Db = context;
+            Mapper = mapper;
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
+
+        public Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName)
+        {
+            var allFks = Db.Model.FindEntityType(typeOfEntity).GetForeignKeys();
+
+            var foundFk = allFks.Single(s => (s.Properties.Select(d => d.Name)).Contains(fkEntityName));
+            if (foundFk == null)
+                throw new Exception($"{fkEntityName} is not a foreign key of {typeOfEntity.ToString()}");
+
+            var typeOfLinkedTable = foundFk.PrincipalEntityType;
+            var clrType = typeOfLinkedTable.ClrType;
+            return typeOfEntity.Assembly
+                .GetType(clrType.FullName ??
+                         throw new InvalidOperationException("ClrType does not have fullName of linked table Type"));
+        }
+
         public Dictionary<string, string> OptionsForForeignKey(string fkDto, string template, string concatenator)
         {
+            FindServiceThatHasCurrentRepository();
             var templateWithColumnNames = new TemplateWithColumnNames(template);
 
             var assemblyOfDb = Db.GetType().Assembly;
             var typesThatImplementsPropertyMapperInterfaceOfTEntity =
-                assemblyOfDb.GetTypesThatImplements(typeof(IPropertyMapper<>), new List<Type>() { typeof(TEntity) });
+                assemblyOfDb.GetTypesThatImplementsGenericInterface(typeof(IPropertyMapper<>), new List<Type>() { typeof(TEntity) });
 
             IPropertyMapper<TEntity> proppertyMapper;
             if (typesThatImplementsPropertyMapperInterfaceOfTEntity.Count == 1)
@@ -67,7 +87,7 @@ namespace CrudMaster.Repository
             var z = typeof(IPropertyMapper<>).MakeGenericType(linkedTableType);
 
             var typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity =
-                assemblyOfDb.GetTypesThatImplements(typeof(IPropertyMapper<>), new List<Type>() { linkedTableType });
+                assemblyOfDb.GetTypesThatImplementsGenericInterface(typeof(IPropertyMapper<>), new List<Type>() { linkedTableType });
 
             if (typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.Count == 1)
                 linkedTableProppertyMapper = Activator.CreateInstance(typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.First());
@@ -76,7 +96,7 @@ namespace CrudMaster.Repository
 
 
             //var i = 0;
-            var colNames = templateWithColumnNames.GetColumnNames();
+            var colNames = templateWithColumnNames.GetDtoColumnNames();
             var matches = templateWithColumnNames.Matches;
             //var mappedColnamesAsStrings = new string[colNames.Length];
 
@@ -91,14 +111,6 @@ namespace CrudMaster.Repository
                     templateToMappedColNameDictionary.Add(dtoColName, colNameAsString);
             }
 
-            //foreach (var colName in colNames)
-            //{
-            //    var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(colName);
-            //    var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
-            //    mappedColnamesAsStrings[i] = colNameAsString;
-            //    i++;
-            //}
-
             var res = dbSetOflinkedTable.Select(x =>
                 new KeyValuePair<string, string>(
                     x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
@@ -109,17 +121,73 @@ namespace CrudMaster.Repository
             return res?.ToDictionary(x => x.Key, x => x.Value);
         }
 
-        private static string ConcatColValues(object entity, IReadOnlyCollection<string> colNames, string concatenator)
+        public Dictionary<string, string> OptionsForForeignKeyTest(Type linkedTableType, List<LambdaExpression> exps)
         {
-            var colValues = new string[colNames.Count];
-            var i = 0;
-            foreach (var colName in colNames)
+            //var e = exps[2].Compile();
+            var templateWithColumnNames = new TemplateWithColumnNames("{asd}");
+            var linkedTableType1 = Db.GetType().Assembly.GetType(linkedTableType.FullName);
+            var dbSetOflinkedTable =
+                (IEnumerable<object>) Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType1).Invoke(Db, null);
+            var xx = dbSetOflinkedTable.ToList().Select(s => templateWithColumnNames.Test(s, exps));
+            //var x = dbSetOflinkedTable.Select(s => templateWithColumnNames.Test(s, exps)).ToList();
+            return null;
+        }
+        public dynamic Test1(dynamic entity)
+        {
+            var x= entity.Region.Name.ToString();
+            return x;
+        }
+        public dynamic Test(dynamic entity, List<LambdaExpression>exps)
+        {
+            string s = "";
+            foreach (var exp in exps)
             {
-                colValues[i] = entity.GetType().GetProperty(colName)?.GetValue(entity).ToString();
-                i++;
+                var compiledLambda = exp.Compile();
+                var result = compiledLambda.DynamicInvoke(entity);
+                s += result.ToString() + " ";
             }
 
-            return colValues.Join(concatenator);
+            return s;
+        }
+        public void FindServiceThatHasCurrentRepository()
+        {
+            var assemblyOfDb = Db.GetType().Assembly;
+            var thisType = this.GetType();
+            var z = assemblyOfDb.GetTypes()
+                .Where(t =>
+                   t.BaseType != null && t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition() == typeof(GenericService<,,,>))
+                .ToList();
+            dynamic s;
+            foreach (var service in z)
+            {
+                var genericTypeArguments = service.BaseType.GenericTypeArguments.Where(ssss => ssss.IsInterface).ToList();
+                foreach (var type in genericTypeArguments)
+                {
+                    var t = type.IsAssignableFrom(thisType);
+                    if (t)
+                    {
+                        s = service;
+                    }
+                }
+            }
+
+            return;
+        }
+
+        
+        private dynamic GetMapp(string dtoColName, Type type)
+        {
+            var x = Mapper.ConfigurationProvider.GetAllTypeMaps().Select(s => s.SourceType == type);
+
+            //foreach (var typeMap in x)
+            //{
+            //    foreach (var typeMapPathMap in typeMap.PropertyMaps)
+            //    {
+
+            //    }
+            //}
+
+            return null;
         }
 
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);

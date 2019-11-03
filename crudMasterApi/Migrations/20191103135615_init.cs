@@ -7,17 +7,17 @@ namespace CrudMasterApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Cities",
+                name: "Region",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(maxLength: 30, nullable: true),
-                    PostalCode = table.Column<string>(maxLength: 6, nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    TestInt = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Cities", x => x.Id);
+                    table.PrimaryKey("PK_Region", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -31,6 +31,26 @@ namespace CrudMasterApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Subjects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Cities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(maxLength: 30, nullable: true),
+                    PostalCode = table.Column<string>(maxLength: 6, nullable: true),
+                    RegionId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Cities_Region_RegionId",
+                        column: x => x.RegionId,
+                        principalTable: "Region",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -108,15 +128,13 @@ namespace CrudMasterApi.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Cities",
-                columns: new[] { "Id", "Name", "PostalCode" },
+                table: "Region",
+                columns: new[] { "Id", "Name", "TestInt" },
                 values: new object[,]
                 {
-                    { 1, "Kovin", "26220" },
-                    { 2, "Beograd", "11000" },
-                    { 3, "Pančevo", "26000" },
-                    { 4, "Novi Sad", "21000" },
-                    { 5, "Beograd", "11000" }
+                    { 1, "Srbija", 111 },
+                    { 2, "Bosna", 222 },
+                    { 3, "Angola", 333 }
                 });
 
             migrationBuilder.InsertData(
@@ -128,6 +146,18 @@ namespace CrudMasterApi.Migrations
                     { 2, "Physics" },
                     { 3, "English" },
                     { 4, "Maths" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Cities",
+                columns: new[] { "Id", "Name", "PostalCode", "RegionId" },
+                values: new object[,]
+                {
+                    { 1, "Kovin", "26220", 1 },
+                    { 2, "Beograd", "11000", 1 },
+                    { 3, "Banja Luka", "26000", 2 },
+                    { 4, "Bihac", "21000", 2 },
+                    { 5, "Luanda", "11000", 3 }
                 });
 
             migrationBuilder.InsertData(
@@ -166,6 +196,11 @@ namespace CrudMasterApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Cities_RegionId",
+                table: "Cities",
+                column: "RegionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Modules_SchoolId",
                 table: "Modules",
                 column: "SchoolId");
@@ -202,6 +237,9 @@ namespace CrudMasterApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Cities");
+
+            migrationBuilder.DropTable(
+                name: "Region");
         }
     }
 }

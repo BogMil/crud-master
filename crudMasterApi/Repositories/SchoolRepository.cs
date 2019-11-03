@@ -1,3 +1,4 @@
+using AutoMapper;
 using CrudMaster.Repository;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;
@@ -10,6 +11,6 @@ namespace CrudMasterApi.Repositories
             GenericRepository<School, AccountingContext, SchoolOrderByPredicateCreator, SchoolWherePredicateCreator>,
 		ISchoolRepository
 	{
-        public SchoolRepository(AccountingContext context) : base(context) { }
+        public SchoolRepository(AccountingContext context,IMapper mapper) : base(context,mapper) { }
     }
 }

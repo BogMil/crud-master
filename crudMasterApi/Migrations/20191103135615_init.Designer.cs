@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrudMasterApi.Migrations
 {
     [DbContext(typeof(AccountingContext))]
-    [Migration("20191023133744_init")]
+    [Migration("20191103135615_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,12 @@ namespace CrudMasterApi.Migrations
                         .HasColumnType("nvarchar(6)")
                         .HasMaxLength(6);
 
+                    b.Property<int>("RegionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
 
                     b.ToTable("Cities");
 
@@ -45,31 +50,36 @@ namespace CrudMasterApi.Migrations
                         {
                             Id = 1,
                             Name = "Kovin",
-                            PostalCode = "26220"
+                            PostalCode = "26220",
+                            RegionId = 1
                         },
                         new
                         {
                             Id = 2,
                             Name = "Beograd",
-                            PostalCode = "11000"
+                            PostalCode = "11000",
+                            RegionId = 1
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Pančevo",
-                            PostalCode = "26000"
+                            Name = "Banja Luka",
+                            PostalCode = "26000",
+                            RegionId = 2
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Novi Sad",
-                            PostalCode = "21000"
+                            Name = "Bihac",
+                            PostalCode = "21000",
+                            RegionId = 2
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Beograd",
-                            PostalCode = "11000"
+                            Name = "Luanda",
+                            PostalCode = "11000",
+                            RegionId = 3
                         });
                 });
 
@@ -189,6 +199,44 @@ namespace CrudMasterApi.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CrudMasterApi.Entities.Region", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TestInt")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Region");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Srbija",
+                            TestInt = 111
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Bosna",
+                            TestInt = 222
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Angola",
+                            TestInt = 333
+                        });
+                });
+
             modelBuilder.Entity("CrudMasterApi.Entities.School", b =>
                 {
                     b.Property<int>("Id")
@@ -286,6 +334,15 @@ namespace CrudMasterApi.Migrations
                             Id = 4,
                             Name = "Maths"
                         });
+                });
+
+            modelBuilder.Entity("CrudMasterApi.Entities.City", b =>
+                {
+                    b.HasOne("CrudMasterApi.Entities.Region", "Region")
+                        .WithMany("Cities")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CrudMasterApi.Entities.Module", b =>

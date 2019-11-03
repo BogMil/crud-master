@@ -16,12 +16,12 @@ namespace CrudMasterApi.Models.CrudMaster
         public string Name { get; set; }
         public string PostalCode { get; set; }
         public int RegionId { get; set; }
-
     }
 
     public class CityQueryDto : CityBase
     {
         public RegionQueryDto Region { get; set; }
+        public string RegionName { get; set; }
     }
 
     public class CityCommandDto : CityBase
@@ -60,12 +60,13 @@ namespace CrudMasterApi.Models.CrudMaster
 
     }
 
-    public class CityMappingProfile : Profile
+    public class CityMappingProfile : Profile 
     {
         public CityMappingProfile()
         {
             CreateMap<City, CityQueryDto>()
-                .ForMember(x => x.Region, o => o.MapFrom(s => s.Region));
+                .ForMember(x => x.Region, o => o.MapFrom(s => s.Region))
+                .ForMember(x => x.RegionName, o => o.MapFrom(s => s.Region.Name));
 
             CreateMap<CityCommandDto, City>()
                 .ForMember(s => s.Region, o => o.Ignore())

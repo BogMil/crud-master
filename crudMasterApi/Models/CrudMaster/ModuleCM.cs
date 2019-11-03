@@ -22,6 +22,7 @@ namespace CrudMasterApi.Models.CrudMaster
     public class ModuleQueryDto : ModuleBase
     {
         public virtual SchoolQueryDto School { get; set; }
+
     }
 
     public class ModuleCommandDto : ModuleBase

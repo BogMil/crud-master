@@ -44,11 +44,14 @@ namespace CrudMasterApi
             services.AddTransient<ICityService, CityService>();
             services.AddTransient<ICityRepository, CityRepository>();
 
-            services.AddTransient<IRegionRepository, RegionRepository>();
-            services.AddTransient<IRegionService, RegionService>();
+            services.AddTransient<IModuleRepository, ModuleRepository>();
+            services.AddTransient<IModuleService, ModuleService>();
 
             services.AddTransient<ISchoolService, SchoolService>();
             services.AddTransient<ISchoolRepository, SchoolRepository>();
+
+            services.AddTransient<IModuleService, ModuleService>();
+            services.AddTransient<IModuleRepository, ModuleRepository>();
 
             services.AddControllers();
         }

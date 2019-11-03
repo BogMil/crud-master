@@ -1,3 +1,4 @@
+using AutoMapper;
 using CrudMaster.Repository;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;
@@ -12,7 +13,7 @@ namespace CrudMasterApi.Repositories
 			GenericRepository<City,AccountingContext,CityOrderByPredicateCreator,CityWherePredicateCreator>,
 		ICityRepository
 	{
-	    public CityRepository(AccountingContext context) : base(context)
+	    public CityRepository(AccountingContext context,IMapper mapper) : base(context,mapper)
 	    {
 	    }
     }

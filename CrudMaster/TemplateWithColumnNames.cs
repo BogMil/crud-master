@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -33,7 +34,7 @@ namespace CrudMaster
             return template;
         }
 
-        public string[] GetColumnNames()
+        public string[] GetDtoColumnNames()
         {
             return Matches.Select(x => x.Groups[1].Value).Distinct().ToArray();
         }
@@ -60,6 +61,21 @@ namespace CrudMaster
             }
 
             return template;
+        }
+
+        public dynamic Test(dynamic entity, List<LambdaExpression> exps)
+        {
+            //return entity.Region.Name.ToString();
+            string s="";
+            foreach (var exp in exps)
+            {
+                var compiledLambda = exp.Compile();
+                var result = compiledLambda.DynamicInvoke(entity);
+                s+= result.ToString()+" ";
+            }
+            
+            return s;
+            //return entity;
         }
     }
 }

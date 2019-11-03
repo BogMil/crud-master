@@ -1,4 +1,5 @@
-﻿using CrudMaster.Repository;
+﻿using AutoMapper;
+using CrudMaster.Repository;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;
 
@@ -12,7 +13,7 @@ namespace CrudMasterApi.Repositories
         GenericRepository<Region, AccountingContext, RegionOrderByPredicateCreator, RegionWherePredicateCreator>,
         IRegionRepository
     {
-        public RegionRepository(AccountingContext context) : base(context)
+        public RegionRepository(AccountingContext context, IMapper mapper) : base(context,mapper)
         {
         }
     }

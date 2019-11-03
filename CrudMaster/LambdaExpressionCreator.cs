@@ -13,6 +13,10 @@ namespace CrudMaster
         public readonly Expression Expression;
         public readonly Type DelegateType;
         public readonly string FullPropertyPath;
+        /// <summary>
+        /// Without parameter
+        /// </summary>
+        /// <param name="fullPropertyPath"></param>
 
         public LambdaExpressionCreator(string fullPropertyPath)
         {
