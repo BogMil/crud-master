@@ -15,8 +15,9 @@ namespace CrudMaster
         public Regex Regex;
         public string[] ColumnNames { get; set; }
         public MatchCollection Matches;
+        public Dictionary<string, LambdaExpression> ExpressionsOfDtoToEntityColNames { get; set; } = new Dictionary<string, LambdaExpression>();
 
-        public TemplateWithColumnNames( string template, string columnTemplateRegexPattern = @"{(.*?)}")
+        public TemplateWithColumnNames(string template, string columnTemplateRegexPattern = @"{(.*?)}")
         {
             Template = template;
             var regex = new Regex(columnTemplateRegexPattern);
@@ -39,7 +40,7 @@ namespace CrudMaster
             return Matches.Select(x => x.Groups[1].Value).Distinct().ToArray();
         }
 
-        public string Replace(Dictionary<string,string> pairs)
+        public string Replace(Dictionary<string, string> pairs)
         {
             var template = Template;
             foreach (var pair in pairs)
@@ -50,7 +51,19 @@ namespace CrudMaster
             return template;
         }
 
-        public string Replace(object entity, Dictionary<string,string> templateToColNamesDictionary)
+        public string Replace(object entity)
+        {
+            var template = GetWithLowerizedColumnNames();
+            foreach (var pair in ExpressionsOfDtoToEntityColNames)
+            {
+                var dtoColNameTemplate = $"{{{pair.Key.ToLower()}}}";
+                template = template.Replace(dtoColNameTemplate, ExecuteExpressionOnObject(entity,pair.Value));
+            }
+
+            return template;
+        }
+
+        public string Replace(object entity, Dictionary<string, string> templateToColNamesDictionary)
         {
             var template = GetWithLowerizedColumnNames();
             foreach (var (dtoColName, entityColName) in templateToColNamesDictionary)
@@ -66,16 +79,24 @@ namespace CrudMaster
         public dynamic Test(dynamic entity, List<LambdaExpression> exps)
         {
             //return entity.Region.Name.ToString();
-            string s="";
+            string s = "";
             foreach (var exp in exps)
             {
                 var compiledLambda = exp.Compile();
                 var result = compiledLambda.DynamicInvoke(entity);
-                s+= result.ToString()+" ";
+                s += result.ToString() + " ";
             }
-            
+
             return s;
             //return entity;
+        }
+        public dynamic ExecuteExpressionOnObject(object entity, LambdaExpression exp)
+        {
+            //return entity.Region.Name.ToString();
+            var compiledLambda = exp.Compile();
+            var result = compiledLambda.DynamicInvoke(entity);
+            var s = result.ToString();
+            return s;
         }
     }
 }

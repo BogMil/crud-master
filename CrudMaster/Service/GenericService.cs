@@ -64,6 +64,7 @@ namespace CrudMaster.Service
 
             var dtoColumnNames = template.GetDtoColumnNames().Select(s => s.ToUpperFirsLetter()).ToList();
             var entityColumnNamesExpressions = new List<LambdaExpression>();
+            var dtoColumnNameToExpression = new Dictionary<string, LambdaExpression>();
             foreach (var dtoColumnName in dtoColumnNames)
             {
                 var pathToLinkedTableProp = "";
@@ -79,17 +80,17 @@ namespace CrudMaster.Service
                     pathToLinkedTableProp = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(expression);
                 }
 
-                Type s = typeOfLinkedTable.GetType();
                 dynamic inst = Activator.CreateInstance(x, pathToLinkedTableProp);
                 var prop = inst.GetType().GetProperty("LambdaExpression");
                 dynamic exp = inst.LambdaExpression;
                 entityColumnNamesExpressions.Add(exp);
+                template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(),exp);
 
             }
             //Repository.Test(typeOfLinkedTable, entityColumnNamesExpressions);
 
             //return Repository.OptionsForForeignKey(fkDtoName, templateWithColumnNames, concatenator);
-            return Repository.OptionsForForeignKeyTest(typeOfLinkedTable, entityColumnNamesExpressions);
+            return Repository.OptionsForForeignKeyTest(typeOfLinkedTable, template);
 
         }
 

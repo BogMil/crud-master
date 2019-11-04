@@ -121,23 +121,50 @@ namespace CrudMaster.Repository
             return res?.ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public Dictionary<string, string> OptionsForForeignKeyTest(Type linkedTableType, List<LambdaExpression> exps)
+        public Dictionary<string, string> OptionsForForeignKeyTest(Type linkedTableType, TemplateWithColumnNames template)
         {
-            //var e = exps[2].Compile();
-            var templateWithColumnNames = new TemplateWithColumnNames("{asd}");
+            var includeStrs = new Dictionary<string, string>();
+            foreach (var exp in template.ExpressionsOfDtoToEntityColNames.Values)
+            {
+                var expressionString = exp.ToString();
+                var regex = new Regex(@"(\w+)\ \=\> \1\.{1}");
+                var expPropNavigatior = regex.Match(expressionString).Value;
+                var name = expressionString.Replace(expPropNavigatior, "");
+
+                if (!name.Contains(".")) continue;
+
+                // ReSharper disable once StringLastIndexOfIsCultureSpecific.1 
+                var lastPosOfDot=name.LastIndexOf(".");
+                name = name.Substring(0, lastPosOfDot);
+                if (!includeStrs.ContainsKey((name)))
+                    includeStrs.Add(name, name);
+            }
+            var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
             var linkedTableType1 = Db.GetType().Assembly.GetType(linkedTableType.FullName);
             var dbSetOflinkedTable =
-                (IEnumerable<object>) Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType1).Invoke(Db, null);
-            var xx = dbSetOflinkedTable.ToList().Select(s => templateWithColumnNames.Test(s, exps));
-            //var x = dbSetOflinkedTable.Select(s => templateWithColumnNames.Test(s, exps)).ToList();
-            return null;
+                (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType1).Invoke(Db, null);
+
+            //var xx = dbSetOflinkedTable;
+            foreach (var includeStr in includeStrs)
+            {
+                dbSetOflinkedTable = dbSetOflinkedTable.Include(includeStr.Value);
+            }
+
+            var res=dbSetOflinkedTable.Select(x =>
+                new KeyValuePair<string, string>(
+                    x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
+                    template.Replace(x)
+                )
+            ).ToList();
+            //var x = dbSetOflinkedTable.ToList().Select(s => Test1(s, exps[0])).ToList();
+            return res?.ToDictionary(x => x.Key, x => x.Value);
         }
-        public dynamic Test1(dynamic entity)
+        public dynamic Test1(dynamic entity, LambdaExpression exps)
         {
-            var x= entity.Region.Name.ToString();
+            var x = entity.Region.Name.ToString();
             return x;
         }
-        public dynamic Test(dynamic entity, List<LambdaExpression>exps)
+        public dynamic Test(dynamic entity, List<LambdaExpression> exps)
         {
             string s = "";
             foreach (var exp in exps)
@@ -174,7 +201,7 @@ namespace CrudMaster.Repository
             return;
         }
 
-        
+
         private dynamic GetMapp(string dtoColName, Type type)
         {
             var x = Mapper.ConfigurationProvider.GetAllTypeMaps().Select(s => s.SourceType == type);
