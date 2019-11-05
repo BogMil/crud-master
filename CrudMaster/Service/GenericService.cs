@@ -45,58 +45,73 @@ namespace CrudMaster.Service
             return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
         }
 
-        public Dictionary<string, string> OptionsForForeignKey(string fkDtoName, string templateWithColumnNames, string concatenator)
+        // ReSharper disable once InconsistentNaming
+        public Dictionary<string, string> OptionsForForeignKey(string dtoFK, string templateWithColumnNames, string concatenator)
         {
-            fkDtoName = fkDtoName.ToUpperFirsLetter();
-
-            var mappingForTEntity = Mapper.GetTypeMapFor(typeof(TEntity), destinationType: typeof(TQueryDto));
-            var mappingForFk = mappingForTEntity.GetPropertyMapForDestionationName(fkDtoName);
-            var fkEntityName = mappingForFk.GetForeignKeyEntityName();
-            var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(typeof(TEntity), fkEntityName);
-
-
-            var serviceRelatedToLinkedTable= typeof(TEntity).Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
-            var queryDtoOfLinkedTable = serviceRelatedToLinkedTable.BaseType.GenericTypeArguments[0];
-            var mappingsForLinkedTEntity = Mapper.GetTypeMapFor(typeOfLinkedTable, queryDtoOfLinkedTable);
-
-            //var z= serviceRelatedToLinkedTable.GetType().GetMethod("GetQueryDtoType").Invoke(serviceRelatedToLinkedTable, null);
+            dtoFK = dtoFK.ToUpperFirsLetter();
             var template = new TemplateWithColumnNames(templateWithColumnNames);
 
+            var entityFK = GetFKNameInEntityForDtoFKName(dtoFK, typeof(TQueryDto), typeof(TEntity));
+            var typeOfLinkedTable = GetTypeOfTableRelatedToFK(typeof(TEntity), entityFK);
+            var queryDtoOfLinkedTable = GetQueryDtoTypeOfRelatedTabelForFK(typeof(TEntity),entityFK);
+
+            var mappingsForLinkedTEntity = Mapper.GetTypeMapFor(typeOfLinkedTable, queryDtoOfLinkedTable);
+            var linkedTableExpressionCreatorType = typeof(LambdaExpressionCreator<>).MakeGenericType(typeOfLinkedTable);
+
             var dtoColumnNames = template.GetDtoColumnNames().Select(s => s.ToUpperFirsLetter()).ToList();
-            var entityColumnNamesExpressions = new List<LambdaExpression>();
-            var dtoColumnNameToExpression = new Dictionary<string, LambdaExpression>();
             foreach (var dtoColumnName in dtoColumnNames)
             {
-                var pathToLinkedTableProp = "";
-                var x = typeof(LambdaExpressionCreator<>).MakeGenericType(typeOfLinkedTable);
-                var propertyMap = mappingsForLinkedTEntity.GetPropertyMapForDestionationName(dtoColumnName);
-                if (propertyMap.CustomMapExpression == null)
+                if (!dtoColumnName.Contains("."))
                 {
-                    pathToLinkedTableProp = dtoColumnName;
+                    var exp = GetMappingExpressionFromDtoToEntity(dtoColumnName,mappingsForLinkedTEntity,linkedTableExpressionCreatorType);
+                    template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(), exp);
                 }
                 else
                 {
-                    dynamic expression = propertyMap.CustomMapExpression;
-                    pathToLinkedTableProp = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(expression);
+
                 }
-
-                dynamic inst = Activator.CreateInstance(x, pathToLinkedTableProp);
-                var prop = inst.GetType().GetProperty("LambdaExpression");
-                dynamic exp = inst.LambdaExpression;
-                entityColumnNamesExpressions.Add(exp);
-                template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(),exp);
-
             }
-            //Repository.Test(typeOfLinkedTable, entityColumnNamesExpressions);
 
-            //return Repository.OptionsForForeignKey(fkDtoName, templateWithColumnNames, concatenator);
-            return Repository.OptionsForForeignKeyTest(typeOfLinkedTable, template);
+            return Repository.OptionsForForeignKey(typeOfLinkedTable, template);
 
         }
 
-        public Type GetQueryDtoType()
+        public LambdaExpression GetMappingExpressionFromDtoToEntity(string dtoColumnName, TypeMap mappingsForLinkedTEntity,Type linkedTableExpressionCreatorType)
         {
-            return typeof(TQueryDto);
+            var pathToLinkedTableProp = dtoColumnName;
+            var propertyMap = mappingsForLinkedTEntity.GetPropertyMapForDestionationName(dtoColumnName);
+            if (propertyMap.CustomMapExpression != null)
+            {
+                dynamic expression = propertyMap.CustomMapExpression;
+                return expression;
+                //pathToLinkedTableProp = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(expression);
+            }
+
+            dynamic linkedTableExpressionCreator =
+                Activator.CreateInstance(linkedTableExpressionCreatorType, pathToLinkedTableProp);
+            return linkedTableExpressionCreator.LambdaExpression;
+        }
+
+        // ReSharper disable once InconsistentNaming
+        public Type GetQueryDtoTypeOfRelatedTabelForFK(Type entity, string fkName)
+        {
+            var typeOfLinkedTable = GetTypeOfTableRelatedToFK(entity, fkName);
+            var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
+            return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
+        }
+
+        // ReSharper disable once InconsistentNaming
+        public string GetFKNameInEntityForDtoFKName(string dtoFK,Type dto,Type entity )
+        {
+            var mappingsForEntity = Mapper.GetTypeMapFor(typeof(TEntity), destinationType: typeof(TQueryDto));
+            var mappingForFk = mappingsForEntity.GetPropertyMapForDestionationName(dtoFK);
+            return mappingForFk.GetForeignKeyEntityName();
+        }
+
+        // ReSharper disable once InconsistentNaming
+        public Type GetTypeOfTableRelatedToFK(Type entityThatHasFK, string fkName )
+        {
+            return Repository.GetTypeOfLinkedTableByForeignKeyName(entityThatHasFK, fkName);
         }
 
         protected virtual IPagedList<TEntity> GetListOfEntites(Pager pager, string filters, OrderByProperties orderByProperties)

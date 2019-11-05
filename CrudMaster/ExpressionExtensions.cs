@@ -78,6 +78,12 @@ namespace CrudMaster
             return false;
         }
 
+        private static bool IsCall(Expression exp)
+        {
+            if (exp.NodeType == ExpressionType.Call)
+                return true;
+            return false;
+        }
         private static bool IsConversion(Expression exp)
         {
             if (exp.NodeType == ExpressionType.Call)

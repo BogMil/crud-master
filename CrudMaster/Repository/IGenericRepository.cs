@@ -22,8 +22,7 @@ namespace CrudMaster.Repository
         Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
 
         TEntity NewDbSet();
-        Dictionary<string, string> OptionsForForeignKey(string fkDto, string template, string concatenator);
-        Dictionary<string, string> OptionsForForeignKeyTest(Type linkedTableType, TemplateWithColumnNames template);
+        Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template);
 
         Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName);
         //dynamic Test(dynamic entityType,LambdaExpression exps);

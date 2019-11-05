@@ -8,6 +8,7 @@ namespace CrudMaster
     {
         public readonly Type EntityType = typeof(TEntity);
         public readonly Type ExpressionsFuncReturnType;
+        //do not change name
         public readonly LambdaExpression LambdaExpression;
         public readonly ParameterExpression ExpressionInputParameter;
         public readonly Expression Expression;

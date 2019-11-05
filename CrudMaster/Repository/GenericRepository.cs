@@ -52,169 +52,38 @@ namespace CrudMaster.Repository
                          throw new InvalidOperationException("ClrType does not have fullName of linked table Type"));
         }
 
-        public Dictionary<string, string> OptionsForForeignKey(string fkDto, string template, string concatenator)
-        {
-            FindServiceThatHasCurrentRepository();
-            var templateWithColumnNames = new TemplateWithColumnNames(template);
-
-            var assemblyOfDb = Db.GetType().Assembly;
-            var typesThatImplementsPropertyMapperInterfaceOfTEntity =
-                assemblyOfDb.GetTypesThatImplementsGenericInterface(typeof(IPropertyMapper<>), new List<Type>() { typeof(TEntity) });
-
-            IPropertyMapper<TEntity> proppertyMapper;
-            if (typesThatImplementsPropertyMapperInterfaceOfTEntity.Count == 1)
-                proppertyMapper = (IPropertyMapper<TEntity>)Activator.CreateInstance(typesThatImplementsPropertyMapperInterfaceOfTEntity.First());
-            else
-                throw new Exception("PropertyMapper not implemented for entity" + typeof(TEntity));
-
-
-            var fkExpression = proppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(fkDto);
-            var fkAsString = fkExpression.GetExpressionBodyAsString();
-
-
-            var allFks = Db.Model.FindEntityType(typeof(TEntity)).GetForeignKeys();
-
-            var fkEntity = allFks.Single(s => s.Properties.Select(d => d.Name).Contains(fkAsString));
-            var nameOfLinkedTable = fkEntity.PrincipalEntityType.Name;
-
-
-            var linkedTableType = assemblyOfDb.GetType(nameOfLinkedTable);
-            var dbSetOflinkedTable = (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType).Invoke(Db, null);
-
-            var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
-
-            dynamic linkedTableProppertyMapper;
-            var z = typeof(IPropertyMapper<>).MakeGenericType(linkedTableType);
-
-            var typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity =
-                assemblyOfDb.GetTypesThatImplementsGenericInterface(typeof(IPropertyMapper<>), new List<Type>() { linkedTableType });
-
-            if (typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.Count == 1)
-                linkedTableProppertyMapper = Activator.CreateInstance(typesThatImplementsPropertyMapperInterfaceOfRelatedTEntity.First());
-            else
-                throw new Exception("PropertyMapper not implemented for entity" + typeof(TEntity));
-
-
-            //var i = 0;
-            var colNames = templateWithColumnNames.GetDtoColumnNames();
-            var matches = templateWithColumnNames.Matches;
-            //var mappedColnamesAsStrings = new string[colNames.Length];
-
-            var templateToMappedColNameDictionary = new Dictionary<string, string>();
-
-            foreach (Match match in matches)
-            {
-                var dtoColName = match.Groups[1].Value;
-                var colNameExpression = linkedTableProppertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoColName);
-                var colNameAsString = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(colNameExpression);
-                if (!templateToMappedColNameDictionary.ContainsKey(dtoColName))
-                    templateToMappedColNameDictionary.Add(dtoColName, colNameAsString);
-            }
-
-            var res = dbSetOflinkedTable.Select(x =>
-                new KeyValuePair<string, string>(
-                    x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
-                    templateWithColumnNames.Replace(x, templateToMappedColNameDictionary)
-                //ConcatColValues(x, mappedColnamesAsStrings, concatenator)
-                )
-            ).ToList();
-            return res?.ToDictionary(x => x.Key, x => x.Value);
-        }
-
-        public Dictionary<string, string> OptionsForForeignKeyTest(Type linkedTableType, TemplateWithColumnNames template)
-        {
-            var includeStrs = new Dictionary<string, string>();
+        public Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template)
+        { 
+            var tableNamesToInclude = new List<string>();
             foreach (var exp in template.ExpressionsOfDtoToEntityColNames.Values)
             {
-                var expressionString = exp.ToString();
-                var regex = new Regex(@"(\w+)\ \=\> \1\.{1}");
-                var expPropNavigatior = regex.Match(expressionString).Value;
-                var name = expressionString.Replace(expPropNavigatior, "");
-
-                if (!name.Contains(".")) continue;
-
-                // ReSharper disable once StringLastIndexOfIsCultureSpecific.1 
-                var lastPosOfDot=name.LastIndexOf(".");
-                name = name.Substring(0, lastPosOfDot);
-                if (!includeStrs.ContainsKey((name)))
-                    includeStrs.Add(name, name);
+                var expString = new ExpressionString(exp.ToString());
+                foreach (var tableName in expString.TableNamesToInclude)
+                {
+                    if(!tableNamesToInclude.Contains(tableName))
+                        tableNamesToInclude.Add(tableName);
+                }
             }
             var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
-            var linkedTableType1 = Db.GetType().Assembly.GetType(linkedTableType.FullName);
+            //var linkedTableType1 = Db.GetType().Assembly.GetType(linkedTableType.FullName);
             var dbSetOflinkedTable =
-                (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType1).Invoke(Db, null);
+                (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType).Invoke(Db, null);
 
-            //var xx = dbSetOflinkedTable;
-            foreach (var includeStr in includeStrs)
+            foreach (var tableName in tableNamesToInclude)
             {
-                dbSetOflinkedTable = dbSetOflinkedTable.Include(includeStr.Value);
+                dbSetOflinkedTable = dbSetOflinkedTable.Include(tableName);
             }
 
-            var res=dbSetOflinkedTable.Select(x =>
+            var res=dbSetOflinkedTable
+                //.ToList()
+                .Select(x =>
                 new KeyValuePair<string, string>(
                     x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
                     template.Replace(x)
                 )
             ).ToList();
-            //var x = dbSetOflinkedTable.ToList().Select(s => Test1(s, exps[0])).ToList();
+
             return res?.ToDictionary(x => x.Key, x => x.Value);
-        }
-        public dynamic Test1(dynamic entity, LambdaExpression exps)
-        {
-            var x = entity.Region.Name.ToString();
-            return x;
-        }
-        public dynamic Test(dynamic entity, List<LambdaExpression> exps)
-        {
-            string s = "";
-            foreach (var exp in exps)
-            {
-                var compiledLambda = exp.Compile();
-                var result = compiledLambda.DynamicInvoke(entity);
-                s += result.ToString() + " ";
-            }
-
-            return s;
-        }
-        public void FindServiceThatHasCurrentRepository()
-        {
-            var assemblyOfDb = Db.GetType().Assembly;
-            var thisType = this.GetType();
-            var z = assemblyOfDb.GetTypes()
-                .Where(t =>
-                   t.BaseType != null && t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition() == typeof(GenericService<,,,>))
-                .ToList();
-            dynamic s;
-            foreach (var service in z)
-            {
-                var genericTypeArguments = service.BaseType.GenericTypeArguments.Where(ssss => ssss.IsInterface).ToList();
-                foreach (var type in genericTypeArguments)
-                {
-                    var t = type.IsAssignableFrom(thisType);
-                    if (t)
-                    {
-                        s = service;
-                    }
-                }
-            }
-
-            return;
-        }
-
-
-        private dynamic GetMapp(string dtoColName, Type type)
-        {
-            var x = Mapper.ConfigurationProvider.GetAllTypeMaps().Select(s => s.SourceType == type);
-
-            //foreach (var typeMap in x)
-            //{
-            //    foreach (var typeMapPathMap in typeMap.PropertyMaps)
-            //    {
-
-            //    }
-            //}
-
-            return null;
         }
 
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);

@@ -65,8 +65,8 @@ namespace CrudMasterApi.Models.CrudMaster
         public CityMappingProfile()
         {
             CreateMap<City, CityQueryDto>()
-                .ForMember(x => x.Region, o => o.MapFrom(s => s.Region))
-                .ForMember(x => x.RegionName, o => o.MapFrom(s => s.Region.Name));
+                .ForMember(x => x.Region, o => o.MapFrom(s => s.Region))    
+                .ForMember(x => x.RegionName, o => o.MapFrom(s => s.Region.Name.ToString() + " " + s.Region.Name.ToString()));
 
             CreateMap<CityCommandDto, City>()
                 .ForMember(s => s.Region, o => o.Ignore())
@@ -74,6 +74,15 @@ namespace CrudMasterApi.Models.CrudMaster
 
             CreateMap<PagedList<City>, StaticPagedList<CityQueryDto>>()
                 .ConvertUsing<PagedListConverter<City, CityQueryDto>>();
+        }
+    }
+
+    public static class Testera
+    {
+        public static string Test(City s)
+        {
+            return s.Region.Name.ToString() + " " + s.Region.Name.ToString();
+            //return s.Name.ToString();
         }
     }
 }
