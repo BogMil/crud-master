@@ -57,6 +57,11 @@ namespace CrudMaster.Repository
             var tableNamesToInclude = new List<string>();
             foreach (var exp in template.ExpressionsOfDtoToEntityColNames.Values)
             {
+                var t = exp.Body.NodeType;
+                if (t == ExpressionType.Call)
+                {
+                    var objectNodeType = (exp.Body as MethodCallExpression).Object.NodeType;
+                }
                 var expString = new ExpressionString(exp.ToString());
                 var x=(exp.Body)as Expression;
                 if (exp.Body.NodeType == ExpressionType.Call)
