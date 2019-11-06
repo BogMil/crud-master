@@ -31,7 +31,7 @@ namespace CrudMaster
             return expressionBodyAsString;
         }
 
-        private static Stack<string> GetStackOfExpressionBodyProperties(Expression expression)
+        public static Stack<string> GetStackOfExpressionBodyProperties(Expression expression)
         {
             var propertyNames = new Stack<string>();
 

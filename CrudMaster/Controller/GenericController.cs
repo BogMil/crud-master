@@ -53,11 +53,6 @@ namespace CrudMaster.Controller
             return Ok(jqGridViewModal);
         }
 
-        class A
-        {
-            public string Ime { get; set; }
-        }
-
         [HttpPost]
         public virtual ActionResult Post([FromBody] TCommandDto dto)
         {

@@ -89,9 +89,9 @@ namespace CrudMasterApi.Models.CrudMaster
     {
         public override void PopulateMps()
         {
-            EntityToQueryDto.Add(x => x.Region, o => o.MapFrom(s => s.Region));
+            //EntityToQueryDto.Add(x => x.Region, o => o.MapFrom(s => s.Region));
             //EntityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => testera(s.Region.Name) + " " + testera(s.Region.Name)));
-            EntityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => s.Region.Name.ToString()));
+            EntityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => s.Region.Name));
             //EntityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => testera(s.Region.Name)));
         }
 

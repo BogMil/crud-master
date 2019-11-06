@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+using CrudMaster.Filter;
 using CrudMaster.Repository;
 using CrudMaster.Sorter;
 using ExpressionBuilder.Operations;
@@ -13,6 +14,9 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
+using ExpressionBuilder.Generics;
+using ExpressionBuilder.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace CrudMaster.Service
 {
@@ -48,9 +52,46 @@ namespace CrudMaster.Service
         }
         public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
         {
+            var wherePredicate= new Filter<TEntity>();
+            if (filters != null)
+            {
+                var jsonFilters = filters.TryParseJToken();
 
-            var entities = GetListOfEntites(pager, filters, orderByProperties);
+                var filterCreator = new FilterCreatorTEST<TEntity>();
+                var x = filterCreator.GetOperationByString("eq");
+
+                var groupConnector = filterCreator.GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
+                var listOfFilters = (JArray) jsonFilters["rules"];
+
+                var filter = new Filter<TEntity>();
+                foreach (var filterRule in listOfFilters)
+                {
+                    var mappingsForLinkedTEntity = Mapper.GetTypeMapFor(typeof(TEntity), typeof(TQueryDto));
+                    //var entityExpressionCreatorType = new LambdaExpressionCreator<TEntity>();
+                    var entityPathExp =
+                        GetMappingExpressionFromDtoToEntity(filterRule["field"].ToString(), mappingsForLinkedTEntity,
+                            typeof(TEntity));
+
+                    var stack = ExpressionExtensions.GetStackOfExpressionBodyProperties(entityPathExp.Body);
+                    var fullPropertyName = string.Join(".", stack.ToArray());
+                    var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyName);
+                    var op = filterRule["op"].ToString();
+                    IOperation operation = filterCreator.GetOperationByString(op);
+                    var dataStr = filterRule["data"].ToString();
+                    dynamic data = filterCreator.GetValidDataByOperationType(operation, dataStr, propertyType);
+                    filter.By(fullPropertyName, operation, data, groupConnector);
+                }
+
+                wherePredicate = filter;
+            }
+
+            var entities = GetListOfEntitesTEST(pager, wherePredicate, orderByProperties);
             return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
+        }
+
+        protected virtual IPagedList<TEntity> GetListOfEntitesTEST(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties)
+        {
+            return Repository.Filter(pager, filters, orderByProperties);
         }
 
         // ReSharper disable once InconsistentNaming
@@ -105,6 +146,12 @@ namespace CrudMaster.Service
         {
             var typeOfLinkedTable = GetTypeOfTableRelatedToFK(entity, fkName);
             var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
+            return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
+        }
+
+        public Type GetQueryDtoTypeOfForSourceEntity(Type entity)
+        {
+            var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(entity);
             return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
         }
 

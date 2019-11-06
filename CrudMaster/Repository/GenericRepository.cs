@@ -9,6 +9,7 @@ using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Service;
 using CrudMaster.Sorter;
+using ExpressionBuilder.Generics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -122,6 +123,26 @@ namespace CrudMaster.Repository
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
 
             var listOfFilteredEntities = filterPredicate == null ? listOfEntities : listOfEntities.Where(filterPredicate);
+            listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
+
+            if (CustomWherePredicate != null)
+                listOfFilteredEntities = listOfFilteredEntities.Where(CustomWherePredicate);
+
+            var listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
+                ? listOfFilteredEntities.OrderBy(orderBy.OrderByProperty)
+                : listOfFilteredEntities.OrderByDescending(orderBy.OrderByProperty);
+
+            var pagedList = Paged(listOfOrderedEntities, pager);
+            return pagedList;
+        }
+
+        public virtual IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties)
+        {
+            var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties);
+
+            IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
+
+            var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
             listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
 
             if (CustomWherePredicate != null)

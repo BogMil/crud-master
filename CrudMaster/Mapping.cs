@@ -8,6 +8,7 @@ using AutoMapper;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using CrudMaster.Service;
 using Microsoft.VisualBasic.CompilerServices;
+using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
 using NewArrayExpression = Castle.DynamicProxy.Generators.Emitters.SimpleAST.NewArrayExpression;
 
@@ -27,6 +28,7 @@ namespace CrudMaster
             var config = new MapperConfiguration(cfg =>
             {
                 mappingTypes.ForEach(cfg.AddProfile);
+
             });
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
@@ -53,6 +55,9 @@ namespace CrudMaster
             {
                 x.ForMember(key, value.Compile());
             }
+
+            CreateMap<PagedList<TEntity>, StaticPagedList<TQueryDto>>()
+                .ConvertUsing<PagedListConverter<TEntity, TQueryDto>>();
         }
 
         public abstract void PopulateMps();
