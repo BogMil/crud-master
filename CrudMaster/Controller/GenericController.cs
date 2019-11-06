@@ -48,7 +48,7 @@ namespace CrudMaster.Controller
         [HttpGet]
         public virtual ActionResult Get([FromQuery] Pager pager, [FromQuery] OrderByProperties orderByProperties, [FromQuery] string filters)
         {
-            var data = Service.GetJqGridData(pager, filters, orderByProperties);
+            var data = Service.GetJqGridDataTest(pager, filters, orderByProperties);
             var jqGridViewModal = JqGridViewModelFactory(data);
             return Ok(jqGridViewModal);
         }

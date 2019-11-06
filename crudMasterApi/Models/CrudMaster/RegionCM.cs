@@ -56,19 +56,27 @@ namespace CrudMasterApi.Models.CrudMaster
 
     }
 
-    public class RegionMappingProfile : Profile
+    //public class RegionMappingProfile : Profile
+    //{
+    //    public RegionMappingProfile()
+    //    {
+    //        CreateMap<Region, RegionQueryDto>()
+    //            .ForMember(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
+
+    //        CreateMap<RegionCommandDto, Region>()
+    //            .ForMember(s => s.Cities, o => o.Ignore())
+    //            .ForMember(s => s.TestInt, o => o.MapFrom(s=>s.NekiInt));
+
+    //        CreateMap<PagedList<Region>, StaticPagedList<RegionQueryDto>>()
+    //            .ConvertUsing<PagedListConverter<Region, RegionQueryDto>>();
+    //    }
+    //}
+
+    public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
     {
-        public RegionMappingProfile()
+        public override void PopulateMps()
         {
-            CreateMap<Region, RegionQueryDto>()
-                .ForMember(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
-
-            CreateMap<RegionCommandDto, Region>()
-                .ForMember(s => s.Cities, o => o.Ignore())
-                .ForMember(s => s.TestInt, o => o.MapFrom(s=>s.NekiInt));
-
-            CreateMap<PagedList<Region>, StaticPagedList<RegionQueryDto>>()
-                .ConvertUsing<PagedListConverter<Region, RegionQueryDto>>();
+            EntityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
         }
     }
 }

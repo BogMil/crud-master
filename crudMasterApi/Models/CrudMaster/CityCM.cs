@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using CrudMaster;
@@ -28,7 +30,9 @@ namespace CrudMasterApi.Models.CrudMaster
     {
     }
 
-    public class CityViewModel : GenericViewModel<CityQueryDto> { }
+    public class CityViewModel : GenericViewModel<CityQueryDto>
+    {
+    }
 
     public class CityOrderByPredicateCreator : GenericOrderByPredicateCreator<City, CityPropertyMapper>
     {
@@ -38,14 +42,17 @@ namespace CrudMasterApi.Models.CrudMaster
         }
     }
 
-    public class CityWherePredicateCreator : GenericWherePredicateCreator<City, CityPropertyMapper> { }
+    public class CityWherePredicateCreator : GenericWherePredicateCreator<City, CityPropertyMapper>
+    {
+    }
 
     public class CityPropertyMapper : GenericPropertyMapper<City, CityQueryDto>
     {
-        public override Expression<Func<City, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
+        public override Expression<Func<City, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(
+            string fieldName)
         {
             fieldName = fieldName.ToLower();
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id)) 
+            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id))
                 return x => x.Id;
             if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Name))
                 return x => x.Name;
@@ -55,34 +62,37 @@ namespace CrudMasterApi.Models.CrudMaster
                 return x => x.Region;
 
             throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
-            "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
+                                "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
         }
 
     }
 
-    public class CityMappingProfile : Profile 
+    //public class CityMappingProfile : Profile
+    //{
+    //    public CityMappingProfile()
+    //    {
+    //        CreateMap<City, CityQueryDto>()
+    //            .ForMember(x => x.Region, o => o.MapFrom(s => s.Region))
+    //            .ForMember(x => x.RegionName,
+    //                o => o.MapFrom(s => s.Region.Name.ToString() + " " + s.Region.Name.ToString()));
+
+    //        CreateMap<CityCommandDto, City>()
+    //            .ForMember(s => s.Region, o => o.Ignore())
+    //            .ForMember(s => s.Schools, o => o.Ignore());
+
+    //        CreateMap<PagedList<City>, StaticPagedList<CityQueryDto>>()
+    //            .ConvertUsing<PagedListConverter<City, CityQueryDto>>();
+    //    }
+    //}
+
+    public class CityMappingProfile : CrudMasterMappingProfile<CityQueryDto, CityCommandDto, City>
     {
-        public CityMappingProfile()
+        public override void PopulateMps()
         {
-            CreateMap<City, CityQueryDto>()
-                .ForMember(x => x.Region, o => o.MapFrom(s => s.Region))    
-                .ForMember(x => x.RegionName, o => o.MapFrom(s => s.Region.Name.ToString() + " " + s.Region.Name.ToString()));
-
-            CreateMap<CityCommandDto, City>()
-                .ForMember(s => s.Region, o => o.Ignore())
-                .ForMember(s => s.Schools, o => o.Ignore());
-
-            CreateMap<PagedList<City>, StaticPagedList<CityQueryDto>>()
-                .ConvertUsing<PagedListConverter<City, CityQueryDto>>();
+            EntityToQueryDto.Add(x => x.Region, o => o.MapFrom(s => s.Region));
+            EntityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => s.Region.Name.ToString() + " " + s.Region.Name.ToString()));
         }
     }
 
-    public static class Testera
-    {
-        public static string Test(City s)
-        {
-            return s.Region.Name.ToString() + " " + s.Region.Name.ToString();
-            //return s.Name.ToString();
-        }
-    }
 }
+

@@ -37,7 +37,6 @@ namespace CrudMaster
 
         public static Type GetCrudMasterServiceWithTEntity(this Assembly assembly, Type TEntity)
         {
-            
             var types = assembly.GetTypes()
                 .Where(t => t.BaseType != null && t.BaseType.IsGenericType && t.IsSubclassOfGenericType(typeof(GenericService<,,,>)))
                 .Where(t => t.BaseType != null && t.BaseType.GenericTypeArguments.Last() == TEntity)

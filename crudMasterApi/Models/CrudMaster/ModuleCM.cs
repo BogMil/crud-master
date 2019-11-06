@@ -60,19 +60,27 @@ namespace CrudMasterApi.Models.CrudMaster
 
     }
 
-    public class ModuleMappingProfile : Profile
+    //public class ModuleMappingProfile : Profile
+    //{
+    //    public ModuleMappingProfile()
+    //    {
+    //        CreateMap<Module, ModuleQueryDto>()
+    //            .ForMember(d => d.School, o => o.MapFrom(s => s.School));
+
+    //        CreateMap<ModuleCommandDto, Module>()
+    //            .ForMember(s => s.SubjectsOfModule, o => o.Ignore())
+    //            .ForMember(s => s.School, o => o.Ignore());
+
+    //        CreateMap<PagedList<Module>, StaticPagedList<ModuleQueryDto>>()
+    //            .ConvertUsing<PagedListConverter<Module, ModuleQueryDto>>();
+    //    }
+    //}
+
+    public class ModuleMappingProfile : CrudMasterMappingProfile<ModuleQueryDto, ModuleCommandDto, Module>
     {
-        public ModuleMappingProfile()
+        public override void PopulateMps()
         {
-            CreateMap<Module, ModuleQueryDto>()
-                .ForMember(d => d.School, o => o.MapFrom(s => s.School));
-
-            CreateMap<ModuleCommandDto, Module>()
-                .ForMember(s => s.SubjectsOfModule, o => o.Ignore())
-                .ForMember(s => s.School, o => o.Ignore());
-
-            CreateMap<PagedList<Module>, StaticPagedList<ModuleQueryDto>>()
-                .ConvertUsing<PagedListConverter<Module, ModuleQueryDto>>();
+            EntityToQueryDto.Add(d => d.School, o => o.MapFrom(s => s.School));
         }
     }
 }

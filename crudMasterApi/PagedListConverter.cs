@@ -10,7 +10,7 @@ namespace CrudMasterApi
 
         public PagedListConverter()
         {
-            _mapper = new AutoMapperConfiguration().Configure().CreateMapper();
+            _mapper = new AutoMapperConfiguration().Configure();
         }
 
         StaticPagedList<TDestination> ITypeConverter<PagedList<TSource>, StaticPagedList<TDestination>>.

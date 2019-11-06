@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Reflection;
+using CrudMaster;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Repositories;
 using CrudMasterApi.Services.CrudMaster;
@@ -36,7 +39,7 @@ namespace CrudMasterApi
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
-            services.AddSingleton(new AutoMapperConfiguration().Configure().CreateMapper());
+            services.AddSingleton(new AutoMapperConfiguration().Configure());
             services.AddSingleton<TranslationTransformer>();
 
             services.AddDbContext<AccountingContext>(options => options.UseLazyLoadingProxies().UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
@@ -77,6 +80,8 @@ namespace CrudMasterApi
                 //endpoints.MapDynamicControllerRoute<TranslationTransformer>("{language}/{controller}/{action}");
                 endpoints.MapControllers();
             });
+
+            app.UseCrudMaster();
         }
     }
 }

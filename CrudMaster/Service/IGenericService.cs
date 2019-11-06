@@ -24,6 +24,7 @@ namespace CrudMaster.Service
         IEnumerable<TQueryDto> GetListOfDto(Pager pager, string filters, OrderByProperties orderByProperties);
         //TViewModel GetJqGridViewModel(Pager pager, string filters, OrderByProperties orderByProperties);
         StaticPagedList<TQueryDto> GetJqGridData(Pager pager, string filters, OrderByProperties orderByProperties);
+        StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties);
         Dictionary<string, string> OptionsForForeignKey(string fkName, string templateWithColumnNames, string concatenator);
 
 

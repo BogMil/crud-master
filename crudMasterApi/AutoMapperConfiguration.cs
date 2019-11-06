@@ -6,7 +6,7 @@ namespace CrudMasterApi
 {
     public class AutoMapperConfiguration 
     {
-        public MapperConfiguration Configure()
+        public IMapper Configure()
         {
             var config = new MapperConfiguration
             (
@@ -17,7 +17,7 @@ namespace CrudMasterApi
             );
             config.AssertConfigurationIsValid();
 
-            return config;
+            return config.CreateMapper();
         }
     }
 }

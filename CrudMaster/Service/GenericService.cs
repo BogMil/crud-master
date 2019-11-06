@@ -9,6 +9,7 @@ using CrudMaster.Repository;
 using CrudMaster.Sorter;
 using ExpressionBuilder.Operations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
@@ -28,7 +29,8 @@ namespace CrudMaster.Service
         protected GenericService(TRepository repository, IMapper mapper)
         {
             Repository = repository;
-            Mapper = mapper;
+            //Mapper = mapper;
+            Mapper = Mapping.Mapper;
         }
 
         public IEnumerable<TQueryDto> GetListOfDto(Pager pager, string filters, OrderByProperties orderByProperties)
@@ -39,6 +41,12 @@ namespace CrudMaster.Service
         }
 
         public virtual StaticPagedList<TQueryDto> GetJqGridData(Pager pager, string filters, OrderByProperties orderByProperties)
+        {
+
+            var entities = GetListOfEntites(pager, filters, orderByProperties);
+            return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
+        }
+        public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
         {
 
             var entities = GetListOfEntites(pager, filters, orderByProperties);

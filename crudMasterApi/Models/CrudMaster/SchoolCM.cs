@@ -64,21 +64,30 @@ namespace CrudMasterApi.Models.CrudMaster
 
     }
 
-    public class SchoolMappingProfile : Profile
+    //public class SchoolMappingProfile : Profile
+    //{
+    //    public SchoolMappingProfile()
+    //    {
+    //        CreateMap<School, SchoolQueryDto>()
+    //            .ForMember(d => d.DtoCityId, o => o.MapFrom(s => s.CityId))
+    //            .ForMember(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
+
+    //        CreateMap<SchoolCommandDto, School>()
+    //            .ForMember(x => x.City, o => o.Ignore())
+    //            .ForMember(x => x.Modules, o => o.Ignore())
+    //            .ForMember(d => d.CityId, o => o.MapFrom(s => s.DtoCityId));
+
+    //        CreateMap<PagedList<School>, StaticPagedList<SchoolQueryDto>>()
+    //            .ConvertUsing<PagedListConverter<School, SchoolQueryDto>>();
+    //    }
+    //}
+
+    public class SchoolMappingProfile : CrudMasterMappingProfile<SchoolQueryDto, SchoolCommandDto, School>
     {
-        public SchoolMappingProfile()
+        public override void PopulateMps()
         {
-            CreateMap<School, SchoolQueryDto>()
-                .ForMember(d => d.DtoCityId, o => o.MapFrom(s => s.CityId))
-                .ForMember(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
-
-            CreateMap<SchoolCommandDto, School>()
-                .ForMember(x => x.City, o => o.Ignore())
-                .ForMember(x => x.Modules, o => o.Ignore())
-                .ForMember(d => d.CityId, o => o.MapFrom(s => s.DtoCityId));
-
-            CreateMap<PagedList<School>, StaticPagedList<SchoolQueryDto>>()
-                .ConvertUsing<PagedListConverter<School, SchoolQueryDto>>();
+            EntityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
+            EntityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
         }
     }
 }
