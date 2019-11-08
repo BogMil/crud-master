@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using AutoMapper;
+using CrudMaster.Extensions;
 using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Service;

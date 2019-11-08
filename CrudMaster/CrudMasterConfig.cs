@@ -19,6 +19,5 @@ namespace CrudMaster
             Config.AssembliesForMapping = assemblies;
         }
 
-        //public void SetBaseAppAssembly(Assembly assembly) => Config.AppAssembly = assembly;
     }
 }

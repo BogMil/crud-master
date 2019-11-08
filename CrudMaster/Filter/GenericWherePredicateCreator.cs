@@ -29,28 +29,28 @@ namespace CrudMaster.Filter
         }
     }
 
-    public class GenericWherePredicateCreatorTEST<TEntity> : IWherePredicateCreator<TEntity>
-        where TEntity : class 
-    {
-        private Filter<TEntity> WherePredicate { get; set; } = new Filter<TEntity>();
-        private readonly FilterCreatorTEST<TEntity> _filterCreator;
-        private readonly IMapper _mapper;
+    //public class GenericWherePredicateCreatorTEST<TEntity> : IWherePredicateCreator<TEntity>
+    //    where TEntity : class 
+    //{
+    //    private Filter<TEntity> WherePredicate { get; set; } = new Filter<TEntity>();
+    //    private readonly FilterCreatorTEST<TEntity> _filterCreator;
+    //    private readonly IMapper _mapper;
 
-        public GenericWherePredicateCreatorTEST(IMapper mapper)
-        {
-            _mapper = mapper;
-            _filterCreator = new FilterCreatorTEST<TEntity>();
-        }
+    //    public GenericWherePredicateCreatorTEST(IMapper mapper)
+    //    {
+    //        _mapper = mapper;
+    //        _filterCreator = new FilterCreatorTEST<TEntity>();
+    //    }
 
-        public Filter<TEntity> GetWherePredicate(string filters)
-        {
-            if (filters == null)
-                return WherePredicate;
+    //    public Filter<TEntity> GetWherePredicate(string filters)
+    //    {
+    //        if (filters == null)
+    //            return WherePredicate;
 
-            var jsonFilters = filters.TryParseJToken();
-            WherePredicate = _filterCreator.Create(jsonFilters,_mapper);
+    //        var jsonFilters = filters.TryParseJToken();
+    //        WherePredicate = _filterCreator.Create(jsonFilters,_mapper);
 
-            return WherePredicate;
-        }
-    }
+    //        return WherePredicate;
+    //    }
+    //}
 }

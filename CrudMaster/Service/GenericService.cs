@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper;
 using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
+using CrudMaster.Extensions;
 using CrudMaster.Filter;
 using CrudMaster.Repository;
 using CrudMaster.Sorter;
@@ -17,6 +18,7 @@ using Expression = System.Linq.Expressions.Expression;
 using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using Newtonsoft.Json.Linq;
+using ExpressionExtensions = CrudMaster.Extensions.ExpressionExtensions;
 
 namespace CrudMaster.Service
 {
@@ -27,20 +29,22 @@ namespace CrudMaster.Service
         where TRepository : IGenericRepository<TEntity>
         where TEntity : class
     {
-        protected TRepository Repository { get; private set; }
-        protected IMapper Mapper { get; private set; }
+        protected TRepository Repository { get; }
+        protected IMapper Mapper { get; }
+
+        protected IMappingService MappingService { get; }
 
         protected GenericService(TRepository repository, IMapper mapper)
         {
             Repository = repository;
-            //Mapper = mapper;
+            MappingService = new MappingService();
             Mapper = Mapping.Mapper;
         }
 
         public IEnumerable<TQueryDto> GetListOfDto(Pager pager, string filters, OrderByProperties orderByProperties)
         {
             var entities = GetListOfEntites(pager, filters, orderByProperties);
-            var listOfDto = Mapper.Map<List<TEntity>, List<TQueryDto>>(entities.ToList());
+            var listOfDto = MappingService.Mapper.Map<List<TEntity>, List<TQueryDto>>(entities.ToList());
             return listOfDto;
         }
 
@@ -48,45 +52,18 @@ namespace CrudMaster.Service
         {
 
             var entities = GetListOfEntites(pager, filters, orderByProperties);
-            return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
+            return MappingService.Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
         }
         public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
         {
-            var wherePredicate= new Filter<TEntity>();
+            var filterCreator = new FilterCreatorTEST<TEntity, TQueryDto>(filters);
+
+            var wherePredicate = new Filter<TEntity>();
             if (filters != null)
-            {
-                var jsonFilters = filters.TryParseJToken();
-
-                var filterCreator = new FilterCreatorTEST<TEntity>();
-                var x = filterCreator.GetOperationByString("eq");
-
-                var groupConnector = filterCreator.GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
-                var listOfFilters = (JArray) jsonFilters["rules"];
-
-                var filter = new Filter<TEntity>();
-                foreach (var filterRule in listOfFilters)
-                {
-                    var mappingsForLinkedTEntity = Mapper.GetTypeMapFor(typeof(TEntity), typeof(TQueryDto));
-                    //var entityExpressionCreatorType = new LambdaExpressionCreator<TEntity>();
-                    var entityPathExp =
-                        GetMappingExpressionFromDtoToEntity(filterRule["field"].ToString(), mappingsForLinkedTEntity,
-                            typeof(TEntity));
-
-                    var stack = ExpressionExtensions.GetStackOfExpressionBodyProperties(entityPathExp.Body);
-                    var fullPropertyName = string.Join(".", stack.ToArray());
-                    var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyName);
-                    var op = filterRule["op"].ToString();
-                    IOperation operation = filterCreator.GetOperationByString(op);
-                    var dataStr = filterRule["data"].ToString();
-                    dynamic data = filterCreator.GetValidDataByOperationType(operation, dataStr, propertyType);
-                    filter.By(fullPropertyName, operation, data, groupConnector);
-                }
-
-                wherePredicate = filter;
-            }
+                wherePredicate = filterCreator.Create();
 
             var entities = GetListOfEntitesTEST(pager, wherePredicate, orderByProperties);
-            return Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
+            return MappingService.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
         }
 
         protected virtual IPagedList<TEntity> GetListOfEntitesTEST(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties)
@@ -94,25 +71,21 @@ namespace CrudMaster.Service
             return Repository.Filter(pager, filters, orderByProperties);
         }
 
-        // ReSharper disable once InconsistentNaming
-        public Dictionary<string, string> OptionsForForeignKey(string dtoFK, string templateWithColumnNames, string concatenator)
+        public Dictionary<string, string> OptionsForForeignKey(string dtoFkName, string templateWithColumnNames, string concatenator)
         {
-            dtoFK = dtoFK.ToUpperFirsLetter();
+            dtoFkName = dtoFkName.ToUpperFirsLetter();
             var template = new TemplateWithColumnNames(templateWithColumnNames);
 
-            var entityFK = GetFKNameInEntityForDtoFKName(dtoFK, typeof(TQueryDto), typeof(TEntity));
-            var typeOfLinkedTable = GetTypeOfTableRelatedToFK(typeof(TEntity), entityFK);
-            var queryDtoOfLinkedTable = GetQueryDtoTypeOfRelatedTabelForFK(typeof(TEntity),entityFK);
-
-            var mappingsForLinkedTEntity = Mapper.GetTypeMapFor(typeOfLinkedTable, queryDtoOfLinkedTable);
-            var linkedTableExpressionCreatorType = typeof(LambdaExpressionCreator<>).MakeGenericType(typeOfLinkedTable);
+            var entityFkName = MappingService.GetFkNameInSourceForDestinationFkName(dtoFkName, typeof(TQueryDto), typeof(TEntity));
+            var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(typeof(TEntity), entityFkName);
+            var queryDtoOfLinkedTable = GetQueryDtoTypeOfRelatedTabelForFk(typeof(TEntity), entityFkName);
 
             var dtoColumnNames = template.GetDtoColumnNames().Select(s => s.ToUpperFirsLetter()).ToList();
             foreach (var dtoColumnName in dtoColumnNames)
             {
                 if (!dtoColumnName.Contains("."))
                 {
-                    var exp = GetMappingExpressionFromDtoToEntity(dtoColumnName,mappingsForLinkedTEntity,linkedTableExpressionCreatorType);
+                    var exp = MappingService.GetMappingExpressionFromDestinationPropToSourceProp(dtoColumnName, queryDtoOfLinkedTable, typeOfLinkedTable);
                     template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(), exp);
                 }
                 else
@@ -122,51 +95,13 @@ namespace CrudMaster.Service
             }
 
             return Repository.OptionsForForeignKey(typeOfLinkedTable, template);
-
         }
 
-        public LambdaExpression GetMappingExpressionFromDtoToEntity(string dtoColumnName, TypeMap mappingsForLinkedTEntity,Type linkedTableExpressionCreatorType)
+        public Type GetQueryDtoTypeOfRelatedTabelForFk(Type entity, string fkName)
         {
-            var pathToLinkedTableProp = dtoColumnName;
-            var propertyMap = mappingsForLinkedTEntity.GetPropertyMapForDestionationName(dtoColumnName);
-            if (propertyMap.CustomMapExpression != null)
-            {
-                dynamic expression = propertyMap.CustomMapExpression;
-                return expression;
-                //pathToLinkedTableProp = ExpressionExtensions.NonExtenionGetExpressionBodyAsString(expression);
-            }
-
-            dynamic linkedTableExpressionCreator =
-                Activator.CreateInstance(linkedTableExpressionCreatorType, pathToLinkedTableProp);
-            return linkedTableExpressionCreator.LambdaExpression;
-        }
-
-        // ReSharper disable once InconsistentNaming
-        public Type GetQueryDtoTypeOfRelatedTabelForFK(Type entity, string fkName)
-        {
-            var typeOfLinkedTable = GetTypeOfTableRelatedToFK(entity, fkName);
+            var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(entity, fkName);
             var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
             return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
-        }
-
-        public Type GetQueryDtoTypeOfForSourceEntity(Type entity)
-        {
-            var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(entity);
-            return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
-        }
-
-        // ReSharper disable once InconsistentNaming
-        public string GetFKNameInEntityForDtoFKName(string dtoFK,Type dto,Type entity )
-        {
-            var mappingsForEntity = Mapper.GetTypeMapFor(typeof(TEntity), destinationType: typeof(TQueryDto));
-            var mappingForFk = mappingsForEntity.GetPropertyMapForDestionationName(dtoFK);
-            return mappingForFk.GetForeignKeyEntityName();
-        }
-
-        // ReSharper disable once InconsistentNaming
-        public Type GetTypeOfTableRelatedToFK(Type entityThatHasFK, string fkName )
-        {
-            return Repository.GetTypeOfLinkedTableByForeignKeyName(entityThatHasFK, fkName);
         }
 
         protected virtual IPagedList<TEntity> GetListOfEntites(Pager pager, string filters, OrderByProperties orderByProperties)
@@ -181,7 +116,7 @@ namespace CrudMaster.Service
 
             var entity = Repository.NewDbSet();
 
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             Repository.Create(entity);
         }
@@ -193,10 +128,10 @@ namespace CrudMaster.Service
 
             var entity = Repository.NewDbSet();
 
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             var createdEntity = Repository.CreateAndReturn(entity);
-            return Mapper.Map<TEntity, TQueryDto>(createdEntity);
+            return MappingService.Mapper.Map<TEntity, TQueryDto>(createdEntity);
         }
 
         public virtual TModel CreateAndReturnModel<TModel>(TCommandDto dto)
@@ -208,7 +143,7 @@ namespace CrudMaster.Service
             Mapper.Map(dto, entity);
 
             var createdEntity = Repository.CreateAndReturn(entity);
-            return Mapper.Map<TEntity, TModel>(createdEntity);
+            return MappingService.Mapper.Map<TEntity, TModel>(createdEntity);
         }
 
         public virtual void ValidateDtoBeforeCreate(TCommandDto dto)
@@ -223,7 +158,7 @@ namespace CrudMaster.Service
 
             var entity = Repository.NewDbSet();
 
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             Repository.Update(entity);
         }
@@ -234,10 +169,10 @@ namespace CrudMaster.Service
             ValidateDtoBeforeUpdateOrCreate(dto);
 
             var entity = Repository.NewDbSet();
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             var upadtedEntity = Repository.UpdateAndReturn(entity);
-            return Mapper.Map<TEntity, TQueryDto>(upadtedEntity);
+            return MappingService.Mapper.Map<TEntity, TQueryDto>(upadtedEntity);
 
         }
 
@@ -247,10 +182,10 @@ namespace CrudMaster.Service
             ValidateDtoBeforeUpdateOrCreate(dto);
 
             var entity = Repository.NewDbSet();
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             var createdEntity = Repository.UpdateAndReturn(entity);
-            return Mapper.Map<TEntity, TModel>(createdEntity);
+            return MappingService.Mapper.Map<TEntity, TModel>(createdEntity);
         }
 
         public virtual void ValidateDtoBeforeUpdate(TCommandDto dto)
@@ -279,7 +214,7 @@ namespace CrudMaster.Service
         public TQueryDto Find(int id)
         {
             var entity = Repository.Find(id);
-            return Mapper.Map<TEntity, TQueryDto>(entity);
+            return MappingService.Mapper.Map<TEntity, TQueryDto>(entity);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using AutoMapper;
+using CrudMaster.Extensions;
 using CrudMaster.PropertyMapper;
 using ExpressionBuilder.Common;
 using ExpressionBuilder.Generics;
@@ -146,32 +147,46 @@ namespace CrudMaster.Filter
 
 
 
-    public class FilterCreatorTEST<TEntity> where TEntity : class
+    public class FilterCreatorTEST<TEntity,TQueryDto> where TEntity : class where TQueryDto: class
     {
-        public Filter<TEntity> Create(JToken jsonFilters, IMapper mapper)
+        public string _filters { get; set; }
+        public JToken JsonFilters{ get; set; }
+        private readonly IMappingService _mappingService;
+        public FilterCreatorTEST(string filters )
         {
-            return ParseExpressionFromJtoken(jsonFilters,mapper);
+            _mappingService = new MappingService();
+            JsonFilters = filters.TryParseJToken();
+
+
+            var groupConnector = GetGroupConnectorFromString(JsonFilters["groupOp"].ToString());
+            var listOfFilters = (JArray)JsonFilters["rules"];
+            GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
+
+        }
+        public Filter<TEntity> Create()
+        {
+            return ParseExpressionFromJtoken(JsonFilters);
         }
 
-        private Filter<TEntity> ParseExpressionFromJtoken(JToken jsonFilters, IMapper mapper)
+        private Filter<TEntity> ParseExpressionFromJtoken(JToken jsonFilters)
         {
             var groupConnector = GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
             var listOfFilters = (JArray)jsonFilters["rules"];
-            return GetExpressionFromListOfStringFilters(listOfFilters, groupConnector,mapper);
+            return GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
         }
 
-        private Filter<TEntity> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector, IMapper mapper)
+        private Filter<TEntity> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
         {
             var filter = new Filter<TEntity>();
             foreach (var filterRule in listOfFilters)
             {
-                var fullPropertyName = GetEfPropertyPathByDtoField(filterRule["field"].ToString(),mapper);
-                var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyName);
+                var fullPropertyPath= _mappingService.GetPropertyPathInSourceType(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
+                var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyPath);
                 var op = filterRule["op"].ToString();
                 IOperation operation = GetOperationByString(op);
                 var dataStr = filterRule["data"].ToString();
                 dynamic data = GetValidDataByOperationType(operation, dataStr, propertyType);
-                filter.By(fullPropertyName, operation, data, groupConnector);
+                filter.By(fullPropertyPath, operation, data, groupConnector);
             }
 
             return filter;
@@ -231,7 +246,7 @@ namespace CrudMaster.Filter
             }
         }
 
-        private string GetEfPropertyPathByDtoField(string dtoField,IMapper mapper)
+        private string GetEfPropertyPathByDtoField(string dtoField)
         {
             //var propertyMapper = new TPropertyMapper();
             //var expresisonMember = propertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoField);

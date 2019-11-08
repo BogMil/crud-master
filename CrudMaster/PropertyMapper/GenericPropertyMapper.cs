@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using CrudMaster.Extensions;
 
 namespace CrudMaster.PropertyMapper
 {

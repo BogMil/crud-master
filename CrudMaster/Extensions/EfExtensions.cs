@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class EfExtensions
     {

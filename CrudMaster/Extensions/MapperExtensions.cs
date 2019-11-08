@@ -36,13 +36,13 @@ namespace CrudMaster
 
     public static class TypeMapExtensions
     {
-        public static PropertyMap GetPropertyMapForDestionationName(this TypeMap typeMap, string destinationName)
+        public static PropertyMap GetPropertyMapByDestinationPropertyName(this TypeMap typeMap, string destinationPropertyNameName)
         {
-            var propertyMapsForDestionationName= typeMap.PropertyMaps.Where(map => map.DestinationName == destinationName).ToList();
+            var propertyMapsForDestionationName= typeMap.PropertyMaps.Where(map => map.DestinationName == destinationPropertyNameName).ToList();
             if(propertyMapsForDestionationName.Count==0)
-                throw new Exception($"No mapping found for destinationName:{destinationName}");
+                throw new Exception($"No mapping found for destinationName:{destinationPropertyNameName}");
             if (propertyMapsForDestionationName.Count > 1)
-                throw new Exception($"Multiple mappings found for destinationName:{destinationName}");
+                throw new Exception($"Multiple mappings found for destinationName:{destinationPropertyNameName}");
 
             return propertyMapsForDestionationName.First();
         }
@@ -50,7 +50,7 @@ namespace CrudMaster
 
     public static class PropertyMapExtensions
     {
-        public static string GetForeignKeyEntityName(this PropertyMap propertyMap)
+        public static string GetNameOfForeignKeyInSource(this PropertyMap propertyMap)
         {
             if (propertyMap.CustomMapExpression == null)
                 return propertyMap.DestinationName;
@@ -65,4 +65,6 @@ namespace CrudMaster
 
         }
     }
+
+    
 }

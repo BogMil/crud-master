@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class ExpressionExtensions
     {

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using Microsoft.AspNetCore.Builder;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

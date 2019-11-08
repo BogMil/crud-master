@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using CrudMaster.Service;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class AssemblyExtensions
     {
