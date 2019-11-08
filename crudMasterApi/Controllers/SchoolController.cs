@@ -8,7 +8,7 @@ namespace CrudMasterApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class SchoolController :
-            GenericController<ISchoolService, SchoolViewModel, SchoolQueryDto, SchoolCommandDto>
+            GenericController<ISchoolService, SchoolQueryDto, SchoolCommandDto>
     {
         public SchoolController(ISchoolService service) : base(service) { }
     }

@@ -26,36 +26,6 @@ namespace CrudMasterApi.Models.CrudMaster
     {
     }
 
-    public class RegionViewModel : GenericViewModel<RegionQueryDto> { }
-
-    public class RegionOrderByPredicateCreator : GenericOrderByPredicateCreator<Region, RegionPropertyMapper>
-    {
-        protected override Expression<Func<Region, dynamic>> GetDefaultOrderByColumn()
-        {
-            return x => x.Id;
-        }
-    }
-
-    public class RegionWherePredicateCreator : GenericWherePredicateCreator<Region, RegionPropertyMapper> { }
-
-    public class RegionPropertyMapper : GenericPropertyMapper<Region, RegionQueryDto>
-    {
-        public override Expression<Func<Region, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
-        {
-            fieldName = fieldName.ToLower();
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id))
-                return x => x.Id;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Name))
-                return x => x.Name;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.NekiInt))
-                return x => x.TestInt;
-
-            throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
-            "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
-        }
-
-    }
-
     //public class RegionMappingProfile : Profile
     //{
     //    public RegionMappingProfile()

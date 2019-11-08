@@ -8,7 +8,7 @@ namespace CrudMasterApi.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class CityController :
-            GenericController<ICityService, CityViewModel, CityQueryDto, CityCommandDto>
+            GenericController<ICityService, CityQueryDto, CityCommandDto>
     {
         public CityController(ICityService service) : base(service) {}
     }

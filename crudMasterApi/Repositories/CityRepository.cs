@@ -5,16 +5,11 @@ using CrudMasterApi.Models.CrudMaster;
 
 namespace CrudMasterApi.Repositories
 {
-    public interface ICityRepository : IGenericRepository<City>
+    public interface ICityRepository : IGenericRepository<City> { }
+    public class CityRepository : GenericRepository<City, AccountingContext>, ICityRepository
     {
-
-    }
-    public class CityRepository : 
-			GenericRepository<City,AccountingContext,CityOrderByPredicateCreator,CityWherePredicateCreator>,
-		ICityRepository
-	{
-	    public CityRepository(AccountingContext context,IMapper mapper) : base(context,mapper)
-	    {
-	    }
+        public CityRepository(AccountingContext context, IMapper mapper) : base(context, mapper)
+        {
+        }
     }
 }

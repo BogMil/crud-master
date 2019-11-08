@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace CrudMaster
 {
-    public class GenericViewModel<TQueryDto> where TQueryDto:class
+    public class GenericViewModel<TQueryDto>
     {
-        public List<TQueryDto> Records;
-        public int CurrentPageNumber;
-        public int TotalNumberOfPages;
-        public int TotalNumberOfRecords;
+        public int CurrentPageNumber { get; set; }
+        public int TotalNumberOfPages { get; set; }
+        public int TotalNumberOfRecords { get; set; }
+        public List<TQueryDto> Records { get; set; }
     }
 }

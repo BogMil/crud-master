@@ -10,7 +10,7 @@ namespace CrudMasterApi.Repositories
 
     }
     public class ModuleRepository :
-        GenericRepository<Module, AccountingContext, ModuleOrderByPredicateCreator, ModuleWherePredicateCreator>,
+        GenericRepository<Module, AccountingContext>,
         IModuleRepository
     {
         public ModuleRepository(AccountingContext context, IMapper mapper) : base(context, mapper)

@@ -29,37 +29,6 @@ namespace CrudMasterApi.Models.CrudMaster
     {
     }
 
-    public class ModuleViewModel : GenericViewModel<ModuleQueryDto> { }
-
-    public class ModuleOrderByPredicateCreator : GenericOrderByPredicateCreator<Module, ModulePropertyMapper>
-    {
-        protected override Expression<Func<Module, dynamic>> GetDefaultOrderByColumn()
-        {
-            return x => x.Id;
-        }
-    }
-
-    public class ModuleWherePredicateCreator : GenericWherePredicateCreator<Module, ModulePropertyMapper> { }
-
-    public class ModulePropertyMapper : GenericPropertyMapper<Module, ModuleQueryDto>
-    {
-        public override Expression<Func<Module, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
-        {
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Id))
-                return x => x.Id;
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Name))
-                return x => x.Name;
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.Principal))
-                return x => x.Principal;
-            if (fieldName == GetExpressionBodyWithoutParameter(t => t.SchoolId))
-                return x => x.SchoolId;
-
-            throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
-            "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
-        }
-
-    }
-
     //public class ModuleMappingProfile : Profile
     //{
     //    public ModuleMappingProfile()

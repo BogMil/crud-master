@@ -10,10 +10,9 @@ using X.PagedList;
 namespace CrudMaster.Controller
 {
 
-    public class GenericController<TService, TViewModel, TQueryDto, TCommandDto> 
+    public class GenericController<TService, TQueryDto, TCommandDto> 
         : Microsoft.AspNetCore.Mvc.Controller
 
-        where TViewModel : GenericViewModel<TQueryDto>, new()
         where TQueryDto : class
         where TCommandDto : class
         where TService : IGenericService<TQueryDto,TCommandDto>
@@ -49,8 +48,15 @@ namespace CrudMaster.Controller
         public virtual ActionResult Get([FromQuery] Pager pager, [FromQuery] OrderByProperties orderByProperties, [FromQuery] string filters)
         {
             var data = Service.GetJqGridDataTest(pager, filters, orderByProperties);
-            var jqGridViewModal = JqGridViewModelFactory(data);
-            return Ok(jqGridViewModal);
+            var viewModel = new GenericViewModel<TQueryDto>
+            {
+                CurrentPageNumber = data.PageNumber,
+                TotalNumberOfPages = data.PageCount,
+                TotalNumberOfRecords = data.TotalItemCount,
+                Records = data.ToList()
+            };
+
+            return Ok(viewModel);
         }
 
         [HttpPost]
@@ -102,19 +108,6 @@ namespace CrudMaster.Controller
         //    return Json(jqGridViewModal);
         //}
 
-
-        private static TViewModel JqGridViewModelFactory(StaticPagedList<TQueryDto> listOfDto)
-        {
-            var viewModel = new TViewModel
-            {
-                CurrentPageNumber = listOfDto.PageNumber,
-                TotalNumberOfPages = listOfDto.PageCount,
-                TotalNumberOfRecords = listOfDto.TotalItemCount,
-                Records = listOfDto.ToList()
-            };
-
-            return viewModel;
-        }
 
         //public static TReturnViewModel JqGridViewModelFactory<TReturnViewModel, QueryDto>(StaticPagedList<QueryDto> listOfDto) 
         //    where TReturnViewModel:GenericJqGridViewModel<QueryDto>,new()

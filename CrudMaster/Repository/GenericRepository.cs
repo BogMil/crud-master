@@ -3,29 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using AutoMapper;
 using CrudMaster.Extensions;
-using CrudMaster.Filter;
-using CrudMaster.PropertyMapper;
-using CrudMaster.Service;
 using CrudMaster.Sorter;
 using ExpressionBuilder.Generics;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using X.PagedList;
 
 namespace CrudMaster.Repository
 {
-    public abstract class GenericRepository<TEntity, TContext, TOrderByPredicateCreator, TFilterPredicateCreator> :
+    public abstract class GenericRepository<TEntity, TContext> :
 
         IGenericRepository<TEntity>
         where TEntity : class
         where TContext : DbContext
-        where TOrderByPredicateCreator : IOrderByPredicateCreator<TEntity>, new()
-        where TFilterPredicateCreator : IWherePredicateCreator<TEntity>, new()
     {
         public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
@@ -116,32 +107,12 @@ namespace CrudMaster.Repository
             Db.SaveChanges();
         }
 
-        public virtual IPagedList<TEntity> Filter(Pager pager, string filters, OrderByProperties orderByProperties)
+        public virtual IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties)
         {
-            var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties);
-            var filterPredicate = new TFilterPredicateCreator().GetWherePredicate(filters);
+            //var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties);
 
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
-
-            var listOfFilteredEntities = filterPredicate == null ? listOfEntities : listOfEntities.Where(filterPredicate);
-            listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
-
-            if (CustomWherePredicate != null)
-                listOfFilteredEntities = listOfFilteredEntities.Where(CustomWherePredicate);
-
-            var listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
-                ? listOfFilteredEntities.OrderBy(orderBy.OrderByProperty)
-                : listOfFilteredEntities.OrderByDescending(orderBy.OrderByProperty);
-
-            var pagedList = Paged(listOfOrderedEntities, pager);
-            return pagedList;
-        }
-
-        public virtual IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties)
-        {
-            var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties);
-
-            IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
+            //listOfEntities = listOfEntities.Include("City.Region");
 
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
             listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
@@ -149,9 +120,15 @@ namespace CrudMaster.Repository
             if (CustomWherePredicate != null)
                 listOfFilteredEntities = listOfFilteredEntities.Where(CustomWherePredicate);
 
-            var listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
-                ? listOfFilteredEntities.OrderBy(orderBy.OrderByProperty)
-                : listOfFilteredEntities.OrderByDescending(orderBy.OrderByProperty);
+            //var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties) ?? null;
+
+            var listOfOrderedEntities = listOfFilteredEntities;
+            if (orderByProperties != null)
+            {
+                listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
+                    ? listOfFilteredEntities.OrderBy(orderByProperties.OrderByProperty)
+                    : listOfFilteredEntities.OrderByDescending(orderByProperties.OrderByProperty);
+            }
 
             var pagedList = Paged(listOfOrderedEntities, pager);
             return pagedList;

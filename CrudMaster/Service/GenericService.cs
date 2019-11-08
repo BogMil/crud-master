@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using AutoMapper;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using CrudMaster.Extensions;
 using CrudMaster.Filter;
 using CrudMaster.Repository;
 using CrudMaster.Sorter;
-using ExpressionBuilder.Operations;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using X.PagedList;
-using Expression = System.Linq.Expressions.Expression;
 using ExpressionBuilder.Generics;
-using ExpressionBuilder.Interfaces;
-using Newtonsoft.Json.Linq;
-using ExpressionExtensions = CrudMaster.Extensions.ExpressionExtensions;
 
 namespace CrudMaster.Service
 {
@@ -41,32 +30,20 @@ namespace CrudMaster.Service
             Mapper = Mapping.Mapper;
         }
 
-        public IEnumerable<TQueryDto> GetListOfDto(Pager pager, string filters, OrderByProperties orderByProperties)
-        {
-            var entities = GetListOfEntites(pager, filters, orderByProperties);
-            var listOfDto = MappingService.Mapper.Map<List<TEntity>, List<TQueryDto>>(entities.ToList());
-            return listOfDto;
-        }
-
-        public virtual StaticPagedList<TQueryDto> GetJqGridData(Pager pager, string filters, OrderByProperties orderByProperties)
-        {
-
-            var entities = GetListOfEntites(pager, filters, orderByProperties);
-            return MappingService.Mapper.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
-        }
         public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
         {
             var filterCreator = new FilterCreatorTEST<TEntity, TQueryDto>(filters);
-
             var wherePredicate = new Filter<TEntity>();
             if (filters != null)
                 wherePredicate = filterCreator.Create();
 
-            var entities = GetListOfEntitesTEST(pager, wherePredicate, orderByProperties);
+            var orderBy = new GenericOrderByPredicateCreator<TEntity,TQueryDto>().GetPropertyObject(orderByProperties);
+
+            var entities = GetListOfEntitesTEST(pager, wherePredicate, orderBy);
             return MappingService.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
         }
 
-        protected virtual IPagedList<TEntity> GetListOfEntitesTEST(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties)
+        protected virtual IPagedList<TEntity> GetListOfEntitesTEST(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties)
         {
             return Repository.Filter(pager, filters, orderByProperties);
         }
@@ -102,11 +79,6 @@ namespace CrudMaster.Service
             var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(entity, fkName);
             var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
             return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
-        }
-
-        protected virtual IPagedList<TEntity> GetListOfEntites(Pager pager, string filters, OrderByProperties orderByProperties)
-        {
-            return Repository.Filter(pager, filters, orderByProperties);
         }
 
         public virtual void Create(TCommandDto dto)

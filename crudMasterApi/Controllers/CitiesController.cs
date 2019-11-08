@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CrudMasterApi.Entities;
+using CrudMasterApi.Models.CrudMaster;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +21,31 @@ namespace CrudMasterApi.Controllers
 
         // GET: api/Cities
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<City>>> GetCities()
+        public List<Dictionary<string,dynamic>> GetCities()
         {
-            return await _context.Cities.ToListAsync();
+            var x= _context.Schools.Select(s=>new Dictionary<string,dynamic>
+            {
+                { "asd",s.CityId},
+                {"a", s.Name}
+            }).ToList();
+
+            return x;
+
+        
+        }
+
+        public class SchoolT
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string Mail { get; set; }
+            public int DtoCityId { get; set; }
+            public C City { get; set; }
+        }
+
+        public class C
+        {
+            public string Name { get; set; }
         }
 
         // GET: api/Cities/5

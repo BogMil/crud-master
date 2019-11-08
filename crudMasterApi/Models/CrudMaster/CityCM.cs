@@ -1,14 +1,5 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using AutoMapper;
 using CrudMaster;
-using CrudMaster.Filter;
-using CrudMaster.PropertyMapper;
-using CrudMaster.Sorter;
 using CrudMasterApi.Entities;
-using X.PagedList;
 
 namespace CrudMasterApi.Models.CrudMaster
 {
@@ -28,43 +19,6 @@ namespace CrudMasterApi.Models.CrudMaster
 
     public class CityCommandDto : CityBase
     {
-    }
-
-    public class CityViewModel : GenericViewModel<CityQueryDto>
-    {
-    }
-
-    public class CityOrderByPredicateCreator : GenericOrderByPredicateCreator<City, CityPropertyMapper>
-    {
-        protected override Expression<Func<City, dynamic>> GetDefaultOrderByColumn()
-        {
-            return x => x.Id;
-        }
-    }
-
-    public class CityWherePredicateCreator : GenericWherePredicateCreator<City, CityPropertyMapper>
-    {
-    }
-
-    public class CityPropertyMapper : GenericPropertyMapper<City, CityQueryDto>
-    {
-        public override Expression<Func<City, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(
-            string fieldName)
-        {
-            fieldName = fieldName.ToLower();
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id))
-                return x => x.Id;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Name))
-                return x => x.Name;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.PostalCode))
-                return x => x.PostalCode;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Region))
-                return x => x.Region;
-
-            throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
-                                "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
-        }
-
     }
 
     //public class CityMappingProfile : Profile

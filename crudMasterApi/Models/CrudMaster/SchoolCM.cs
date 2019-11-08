@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using AutoMapper;
+﻿using System.Collections.Generic;
 using CrudMaster;
-using CrudMaster.Filter;
-using CrudMaster.PropertyMapper;
-using CrudMaster.Sorter;
 using CrudMasterApi.Entities;
-using X.PagedList;
 
 namespace CrudMasterApi.Models.CrudMaster
 {
@@ -23,7 +16,7 @@ namespace CrudMasterApi.Models.CrudMaster
     public class SchoolQueryDto : SchoolBase
     {
         public CityQueryDto City { get; set; }
-        public List<ModuleQueryDto> Modules { get; set; }
+        //public List<ModuleQueryDto> Modules { get; set; }
         public string RegionName { get; set; }
 
     }
@@ -32,40 +25,6 @@ namespace CrudMasterApi.Models.CrudMaster
     {
     }
 
-    public class SchoolViewModel : GenericViewModel<SchoolQueryDto> { }
-
-    public class SchoolOrderByPredicateCreator : GenericOrderByPredicateCreator<School, SchoolPropertyMapper>
-    {
-        protected override Expression<Func<School, dynamic>> GetDefaultOrderByColumn()
-        {
-            return x => x.Id;
-        }
-    }
-
-    public class SchoolWherePredicateCreator : GenericWherePredicateCreator<School, SchoolPropertyMapper> { }
-
-    public class SchoolPropertyMapper : GenericPropertyMapper<School, SchoolQueryDto>
-    {
-        public override Expression<Func<School, dynamic>> GetCorespondingPropertyNavigationInEntityForDtoField(string fieldName)
-        {
-            fieldName = fieldName.ToLower();
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Id))
-                return x => x.Id;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Mail))
-                return x => x.Mail;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.Name))
-                return x => x.Name;
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.DtoCityId))
-                return x => x.CityId;
-
-            if (fieldName == GetExpressionBodyWithoutParameterToLower(t => t.RegionName))
-                return x => x.City.Region.Name;
-
-            throw new Exception("Putem requesta je poslato nepostojece polje " + fieldName +
-            "  Obezbediti da za svako polje iz QueryDto modela postoji odgovarajuce mapiranje u entity modelu (bazi).");
-        }
-
-    }
 
     //public class SchoolMappingProfile : Profile
     //{

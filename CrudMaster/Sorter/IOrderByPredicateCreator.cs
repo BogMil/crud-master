@@ -1,8 +1,8 @@
 ﻿namespace CrudMaster.Sorter
 
 {
-    public interface IOrderByPredicateCreator<TEntity>
+    public interface IOrderByPredicateCreator
     {
-        IOrderByProperties<TEntity> GetPropertyObject(OrderByProperties orderByProperties);
+        IOrderByProperties GetPropertyObject(OrderByProperties orderByProperties);
     }
 }

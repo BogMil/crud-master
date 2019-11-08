@@ -11,7 +11,7 @@ namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ModuleController : GenericController<IModuleService, ModuleViewModel, ModuleQueryDto, ModuleCommandDto>
+    public class ModuleController : GenericController<IModuleService, ModuleQueryDto, ModuleCommandDto>
     {
         public ModuleController(IModuleService service) : base(service) { }
     }

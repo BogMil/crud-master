@@ -12,8 +12,8 @@ namespace CrudMaster.Repository
     {
         //IEnumerable<TEntity> All(Pager pager);
 
-        IPagedList<TEntity> Filter(Pager pager, string filters, OrderByProperties orderByProperties);
-        IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, OrderByProperties orderByProperties);
+        //IPagedList<TEntity> Filter(Pager pager, string filters, OrderByProperties orderByProperties);
+        IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties);
 
         TEntity Find(int id);
         void Create(TEntity entity);
