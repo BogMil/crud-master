@@ -4,6 +4,7 @@ using CrudMaster;
 using CrudMaster.Extensions;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Repositories;
+using CrudMasterApi.School;
 using CrudMasterApi.Services.CrudMaster;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

@@ -9,12 +9,8 @@ namespace CrudMasterApi.Repositories
     {
 
     }
-    public class ModuleRepository :
-        GenericRepository<Module, AccountingContext>,
-        IModuleRepository
+    public class ModuleRepository : GenericRepository<Module, AccountingContext>, IModuleRepository
     {
-        public ModuleRepository(AccountingContext context, IMapper mapper) : base(context, mapper)
-        {
-        }
+        public ModuleRepository(AccountingContext context) : base(context) { }
     }
 }

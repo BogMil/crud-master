@@ -21,17 +21,13 @@ namespace CrudMasterApi.Controllers
 
         // GET: api/Cities
         [HttpGet]
-        public List<Dictionary<string,dynamic>> GetCities()
+        public dynamic GetCities()
         {
-            var x= _context.Schools.Select(s=>new Dictionary<string,dynamic>
-            {
-                { "asd",s.CityId},
-                {"a", s.Name}
-            }).ToList();
+            var x = _context.Schools.ToList();
 
             return x;
 
-        
+
         }
 
         public class SchoolT

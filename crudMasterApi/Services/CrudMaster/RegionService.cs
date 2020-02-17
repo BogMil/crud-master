@@ -12,7 +12,7 @@ namespace CrudMasterApi.Services.CrudMaster
     }
     public class RegionService : GenericService<RegionQueryDto, RegionCommandDto, IRegionRepository, Region>, IRegionService
     {
-        public RegionService(IRegionRepository repository, IMapper mapper) : base(repository, mapper)
+        public RegionService(IRegionRepository repository) : base(repository)
         {
 
         }

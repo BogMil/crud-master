@@ -46,6 +46,11 @@ namespace CrudMaster
             new Dictionary<Expression<Func<TQueryDto, dynamic>>,
                 Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>>();
 
+        public Dictionary<Expression<Func<TEntity, dynamic>>,
+            Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity,  dynamic>>>> CommandDtoToEntity =
+            new Dictionary<Expression<Func<TEntity, dynamic>>,
+                Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity, dynamic>>>>();
+
         protected CrudMasterMappingProfile()
         {
             // ReSharper disable once VirtualMemberCallInConstructor
@@ -55,6 +60,12 @@ namespace CrudMaster
             foreach (var (key, value) in EntityToQueryDto)
             {
                 x.ForMember(key, value.Compile());
+            }
+
+            var y = CreateMap<TCommandDto,TEntity>();
+            foreach (var (key, value) in CommandDtoToEntity)
+            {
+                y.ForMember(key, value.Compile());
             }
 
             CreateMap<PagedList<TEntity>, StaticPagedList<TQueryDto>>()

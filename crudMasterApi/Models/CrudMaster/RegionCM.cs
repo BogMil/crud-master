@@ -47,6 +47,9 @@ namespace CrudMasterApi.Models.CrudMaster
         public override void PopulateMps()
         {
             EntityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
+            
+            CommandDtoToEntity.Add(s=>s.Cities,o=>o.Ignore());
+            CommandDtoToEntity.Add(s=>s.TestInt,o=>o.MapFrom(d=>d.NekiInt));
         }
     }
 }

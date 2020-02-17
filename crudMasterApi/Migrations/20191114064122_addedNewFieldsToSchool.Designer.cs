@@ -4,14 +4,16 @@ using CrudMasterApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CrudMasterApi.Migrations
 {
     [DbContext(typeof(AccountingContext))]
-    partial class AccountingContextModelSnapshot : ModelSnapshot
+    [Migration("20191114064122_addedNewFieldsToSchool")]
+    partial class addedNewFieldsToSchool
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,9 +258,6 @@ namespace CrudMasterApi.Migrations
                     b.Property<bool>("NekiBool")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("NekiDatum")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("NekiDecimal")
                         .HasColumnType("decimal(18,2)");
 
@@ -288,7 +287,6 @@ namespace CrudMasterApi.Migrations
                             Mail = "gimeko@yahoo.com",
                             Name = "Gimnazija i ekonomska škola Branko Radičević",
                             NekiBool = true,
-                            NekiDatum = new DateTime(2019, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NekiDecimal = 1.1m,
                             NekiDouble = 0.11,
                             NekiFloat = 0.1f,
@@ -302,7 +300,6 @@ namespace CrudMasterApi.Migrations
                             Mail = "gimeko@yahoo.com",
                             Name = "Gimnazija i ekonomska škola Branko Radičević",
                             NekiBool = false,
-                            NekiDatum = new DateTime(2018, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NekiDecimal = 2.2m,
                             NekiDouble = 0.22,
                             NekiFloat = 0.2f,
@@ -316,7 +313,6 @@ namespace CrudMasterApi.Migrations
                             Mail = "gimeko@yahoo.com",
                             Name = "Gimnazija i ekonomska škola Branko Radičević",
                             NekiBool = true,
-                            NekiDatum = new DateTime(2017, 11, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NekiDecimal = 3.3m,
                             NekiDouble = 0.33000000000000002,
                             NekiFloat = 0.3f,
@@ -330,7 +326,6 @@ namespace CrudMasterApi.Migrations
                             Mail = "gimeko@yahoo.com",
                             Name = "Gimnazija i ekonomska škola Branko Radičević",
                             NekiBool = true,
-                            NekiDatum = new DateTime(2019, 7, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NekiDecimal = 4.4m,
                             NekiDouble = 0.44,
                             NekiFloat = 0.4f,
@@ -343,7 +338,6 @@ namespace CrudMasterApi.Migrations
                             CityId = 1,
                             Name = "Srednja stručna škola Mihajlo Pupin",
                             NekiBool = true,
-                            NekiDatum = new DateTime(2019, 5, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NekiDecimal = 5.5m,
                             NekiDouble = 0.55000000000000004,
                             NekiFloat = 0.5f,

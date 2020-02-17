@@ -28,7 +28,7 @@ namespace CrudMaster.Controller
         public virtual ActionResult OptionsForForeignKey(string fkName,string template,string concatenator=" ")
         {
             var data = Service.OptionsForForeignKey(fkName, template,concatenator);
-            return Ok(data);
+            return Ok(data.ToArray());
         }
 
         public string LowerizeColumnNamesInTemplate(string template)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using AutoMapper;
+using X.PagedList;
 
 namespace CrudMaster
 {
@@ -18,6 +19,8 @@ namespace CrudMaster
         string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType);
 
         string GetFkNameInSourceForDestinationFkName(string destinationFkName, Type destinationType, Type sourceType);
+        StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source);
+
     }
 
     public class MappingService : IMappingService
@@ -27,6 +30,11 @@ namespace CrudMaster
         public TDestination Map<TSource,TDestination>(TSource source)
         {
             return Mapper.Map<TSource, TDestination>(source);
+        }
+
+        public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source)
+        {
+            return Mapper.Map<IPagedList <TSource>,StaticPagedList<TDestination>>((PagedList<TSource>)source);
         }
 
         public TypeMap GetTypeMapFor(Type sourceType, Type destinationType)

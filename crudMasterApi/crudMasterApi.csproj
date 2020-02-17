@@ -1,8 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20191209093154_addedDatumToSchool.cs" />
+    <Compile Remove="Migrations\20191209093154_addedDatumToSchool.Designer.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="LambdaExpressionBuilder" Version="2.1.1-rc" />

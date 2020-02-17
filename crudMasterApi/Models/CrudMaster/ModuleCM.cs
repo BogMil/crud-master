@@ -7,6 +7,7 @@ using CrudMaster.Filter;
 using CrudMaster.PropertyMapper;
 using CrudMaster.Sorter;
 using CrudMasterApi.Entities;
+using CrudMasterApi.School;
 using X.PagedList;
 
 namespace CrudMasterApi.Models.CrudMaster
@@ -50,6 +51,9 @@ namespace CrudMasterApi.Models.CrudMaster
         public override void PopulateMps()
         {
             EntityToQueryDto.Add(d => d.School, o => o.MapFrom(s => s.School));
+
+            CommandDtoToEntity.Add(s=>s.School,o=>o.Ignore());
+            CommandDtoToEntity.Add(s=>s.SubjectsOfModule, o => o.Ignore());
         }
     }
 }

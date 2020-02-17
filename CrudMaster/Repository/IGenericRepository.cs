@@ -28,6 +28,7 @@ namespace CrudMaster.Repository
         Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template);
 
         Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName);
+
         //dynamic Test(dynamic entityType,LambdaExpression exps);
 
     }

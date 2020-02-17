@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AutoMapper;
 using CrudMaster.Extensions;
 using CrudMaster.Sorter;
 using ExpressionBuilder.Generics;
@@ -21,11 +20,9 @@ namespace CrudMaster.Repository
         public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
 
-        protected IMapper Mapper;
-        protected GenericRepository(TContext context, IMapper mapper)
+        protected GenericRepository(TContext context)
         {
             Db = context;
-            Mapper = mapper;
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
@@ -109,8 +106,6 @@ namespace CrudMaster.Repository
 
         public virtual IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties)
         {
-            //var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties);
-
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
             //listOfEntities = listOfEntities.Include("City.Region");
 
@@ -119,8 +114,6 @@ namespace CrudMaster.Repository
 
             if (CustomWherePredicate != null)
                 listOfFilteredEntities = listOfFilteredEntities.Where(CustomWherePredicate);
-
-            //var orderBy = new TOrderByPredicateCreator().GetPropertyObject(orderByProperties) ?? null;
 
             var listOfOrderedEntities = listOfFilteredEntities;
             if (orderByProperties != null)
@@ -131,10 +124,9 @@ namespace CrudMaster.Repository
             }
 
             var pagedList = Paged(listOfOrderedEntities, pager);
+            
             return pagedList;
         }
-
-
 
         protected virtual IQueryable<TEntity> ApplyCustomCondition(IQueryable<TEntity> listOfFilteredEntities) => listOfFilteredEntities;
 

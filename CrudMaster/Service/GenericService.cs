@@ -19,33 +19,20 @@ namespace CrudMaster.Service
         where TEntity : class
     {
         protected TRepository Repository { get; }
-        protected IMapper Mapper { get; }
-
         protected IMappingService MappingService { get; }
-
-        protected GenericService(TRepository repository, IMapper mapper)
+        protected GenericService(TRepository repository)
         {
             Repository = repository;
             MappingService = new MappingService();
-            Mapper = Mapping.Mapper;
         }
 
         public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
         {
-            var filterCreator = new FilterCreatorTEST<TEntity, TQueryDto>(filters);
-            var wherePredicate = new Filter<TEntity>();
-            if (filters != null)
-                wherePredicate = filterCreator.Create();
+            var wherePredicate = FilterFactory.Create<TEntity, TQueryDto>(filters);
+            var orderBy = new GenericOrderByPredicateCreator<TEntity, TQueryDto>().GetPropertyObject(orderByProperties);
+            var entities = Repository.Filter(pager, wherePredicate, orderBy);
 
-            var orderBy = new GenericOrderByPredicateCreator<TEntity,TQueryDto>().GetPropertyObject(orderByProperties);
-
-            var entities = GetListOfEntitesTEST(pager, wherePredicate, orderBy);
-            return MappingService.Map<IPagedList<TEntity>, StaticPagedList<TQueryDto>>((PagedList<TEntity>)entities);
-        }
-
-        protected virtual IPagedList<TEntity> GetListOfEntitesTEST(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties)
-        {
-            return Repository.Filter(pager, filters, orderByProperties);
+            return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
 
         public Dictionary<string, string> OptionsForForeignKey(string dtoFkName, string templateWithColumnNames, string concatenator)
@@ -112,7 +99,7 @@ namespace CrudMaster.Service
             ValidateDtoBeforeUpdateOrCreate(dto);
 
             var entity = Repository.NewDbSet();
-            Mapper.Map(dto, entity);
+            MappingService.Mapper.Map(dto, entity);
 
             var createdEntity = Repository.CreateAndReturn(entity);
             return MappingService.Mapper.Map<TEntity, TModel>(createdEntity);

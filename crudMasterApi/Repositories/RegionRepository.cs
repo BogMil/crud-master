@@ -11,7 +11,7 @@ namespace CrudMasterApi.Repositories
     }
     public class RegionRepository : GenericRepository<Region, AccountingContext>, IRegionRepository
     {
-        public RegionRepository(AccountingContext context, IMapper mapper) : base(context, mapper)
+        public RegionRepository(AccountingContext context) : base(context)
         {
         }
     }

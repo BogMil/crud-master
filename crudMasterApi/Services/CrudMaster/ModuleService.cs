@@ -9,6 +9,6 @@ namespace CrudMasterApi.Services.CrudMaster
     public interface IModuleService : IGenericService<ModuleQueryDto, ModuleCommandDto> { }
     public class ModuleService : GenericService<ModuleQueryDto, ModuleCommandDto, IModuleRepository, Module>, IModuleService
     {
-        public ModuleService(IModuleRepository repository, IMapper mapper) : base(repository, mapper) { }
+        public ModuleService(IModuleRepository repository) : base(repository) { }
     }
 }
