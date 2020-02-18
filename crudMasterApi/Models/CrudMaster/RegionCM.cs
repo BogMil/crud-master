@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using CrudMaster;
@@ -44,12 +45,12 @@ namespace CrudMasterApi.Models.CrudMaster
 
     public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
     {
-        public override void PopulateMps()
+        public override void PopulateMps(Dictionary<Expression<Func<RegionQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Region, RegionQueryDto, dynamic>>>> entityToQueryDto)
         {
-            EntityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
-            
-            CommandDtoToEntity.Add(s=>s.Cities,o=>o.Ignore());
-            CommandDtoToEntity.Add(s=>s.TestInt,o=>o.MapFrom(d=>d.NekiInt));
+            entityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
+
+            CommandDtoToEntity.Add(s => s.Cities, o => o.Ignore());
+            CommandDtoToEntity.Add(s => s.TestInt, o => o.MapFrom(d => d.NekiInt));
         }
     }
 }

@@ -9,6 +9,7 @@ using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using CrudMaster.Extensions;
 using CrudMaster.Service;
 using Microsoft.VisualBasic.CompilerServices;
+using Microsoft.VisualBasic.FileIO;
 using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
 using NewArrayExpression = Castle.DynamicProxy.Generators.Emitters.SimpleAST.NewArrayExpression;
@@ -41,8 +42,8 @@ namespace CrudMaster
 
     public abstract class CrudMasterMappingProfile<TQueryDto, TCommandDto, TEntity> : Profile where TQueryDto : class where TEntity : class where TCommandDto : class
     {
-        public Dictionary<Expression<Func<TQueryDto, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> EntityToQueryDto =
+        private Dictionary<Expression<Func<TQueryDto, dynamic>>,
+            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> _entityToQueryDto =
             new Dictionary<Expression<Func<TQueryDto, dynamic>>,
                 Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>>();
 
@@ -53,30 +54,45 @@ namespace CrudMaster
 
         protected CrudMasterMappingProfile()
         {
-            // ReSharper disable once VirtualMemberCallInConstructor
-            PopulateMps();
+            
+            PopulateMps(_entityToQueryDto);
             ValidateMapsFromEntityToQueryDto();
-            var x = CreateMap<TEntity, TQueryDto>();
-            foreach (var (key, value) in EntityToQueryDto)
+
+            var entityToQueryDtoMap = CreateMap<TEntity, TQueryDto>();
+            foreach (var (key, value) in _entityToQueryDto)
             {
-                x.ForMember(key, value.Compile());
+                entityToQueryDtoMap.ForMember(key, value.Compile());
             }
 
-            var y = CreateMap<TCommandDto,TEntity>();
+            var commandDtoToEntityMap = CreateMap<TCommandDto,TEntity>();
+            IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(commandDtoToEntityMap);
             foreach (var (key, value) in CommandDtoToEntity)
             {
-                y.ForMember(key, value.Compile());
+                commandDtoToEntityMap.ForMember(key, value.Compile());
             }
 
             CreateMap<PagedList<TEntity>, StaticPagedList<TQueryDto>>()
                 .ConvertUsing<PagedListConverter<TEntity, TQueryDto>>();
         }
 
-        public abstract void PopulateMps();
+        private void IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(IMappingExpression<TCommandDto,TEntity> mapping)
+        {
+            var propertiesOfEntity=typeof(TEntity).GetProperties().ToList();
+            var propertiesToIgnore = propertiesOfEntity.GetPropertiesThatAreNotBaseTypes();
+
+            propertiesToIgnore.ForEach(property =>
+            {
+                var expressionCreator = new LambdaExpressionCreator<TEntity>(property.Name);
+                mapping.ForMember(expressionCreator.FullPropertyPath, o => o.Ignore());
+            });
+        }
+
+        public abstract void PopulateMps(Dictionary<Expression<Func<TQueryDto, dynamic>>,
+            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> entityToQueryDto );
 
         public void ValidateMapsFromEntityToQueryDto()
         {
-            foreach (var (key, value) in EntityToQueryDto)
+            foreach (var (key, value) in _entityToQueryDto)
             {
                 var mapFromT = ".MapFrom(";
                 var x = value.ToString();

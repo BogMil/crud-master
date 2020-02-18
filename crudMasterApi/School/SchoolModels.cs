@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using AutoMapper;
 using CrudMaster;
 using CrudMasterApi.Models.CrudMaster;
 
@@ -11,6 +14,7 @@ namespace CrudMasterApi.School
         public string Mail { get; set; }
         public int DtoCityId { get; set; }
         public int NekiInt { get; set; }
+        public int? NekiNullableInt { get; set; }
         public long NekiLong { get; set; }
         public bool NekiBool { get; set; }
         public decimal NekiDecimal { get; set; }
@@ -30,15 +34,18 @@ namespace CrudMasterApi.School
     public class SchoolCommandDto : SchoolBase { }
     public class SchoolMappingProfile : CrudMasterMappingProfile<SchoolQueryDto, SchoolCommandDto, Entities.School>
     {
-        public override void PopulateMps()
+        public override void PopulateMps(
+            Dictionary<Expression<Func<SchoolQueryDto, dynamic>>, Expression<
+                Action<IMemberConfigurationExpression<Entities.School, SchoolQueryDto, dynamic>>>> entityToQueryDto)
         {
-            EntityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
-            EntityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name));
-            EntityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
+            entityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
+            entityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name));
+
+            entityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
 
             CommandDtoToEntity.Add(d => d.CityId, o => o.MapFrom(s => s.DtoCityId));
-            CommandDtoToEntity.Add(d=>d.City,o=>o.Ignore());
-            CommandDtoToEntity.Add(d=>d.Modules,o=>o.Ignore());
+            //CommandDtoToEntity.Add(d => d.City, o => o.Ignore());
+            //CommandDtoToEntity.Add(d => d.Modules, o => o.Ignore());
         }
     }
 }

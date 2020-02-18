@@ -7,6 +7,8 @@
   <ItemGroup>
     <Compile Remove="Migrations\20191209093154_addedDatumToSchool.cs" />
     <Compile Remove="Migrations\20191209093154_addedDatumToSchool.Designer.cs" />
+    <Compile Remove="Migrations\20200218071256_AddedNullableIntToSchool.cs" />
+    <Compile Remove="Migrations\20200218071256_AddedNullableIntToSchool.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

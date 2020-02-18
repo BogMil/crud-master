@@ -20,6 +20,7 @@ namespace CrudMasterApi.Entities
         public virtual City City { get; set; }
 
         public int NekiInt { get; set; }
+        public int? NekiNullableInt { get; set; }
         public long NekiLong{ get; set; }
         public bool NekiBool { get; set; }
         public decimal NekiDecimal{ get; set; }
