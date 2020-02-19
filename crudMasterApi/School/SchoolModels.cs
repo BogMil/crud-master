@@ -39,7 +39,7 @@ namespace CrudMasterApi.School
                 Action<IMemberConfigurationExpression<Entities.School, SchoolQueryDto, dynamic>>>> entityToQueryDto)
         {
             entityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
-            entityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name));
+            entityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name+"ski"));
 
             entityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
 

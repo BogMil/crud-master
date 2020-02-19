@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using AutoMapper;
@@ -57,10 +58,26 @@ namespace CrudMaster
             return linkedTableExpressionCreator.LambdaExpression;
         }
 
+        public LambdaExpressionCreator<dynamic> GetExpressionCreatorForMappingFromDestinationPropToSourceProp(string destinationPropertyName, Type destinationType, Type sourceType)
+        {
+            //var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
+
+            //var propertyMap = typeMap.GetPropertyMapByDestinationPropertyName(destinationPropertyName);
+            //if (propertyMap.CustomMapExpression != null)
+            //    return propertyMap.CustomMapExpression;
+
+            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionCreator<>).MakeGenericType(destinationType);
+            dynamic linkedTableExpressionCreator =
+                Activator.CreateInstance(sourceTypeLambdaExpressionCreatorType, destinationPropertyName);
+            return linkedTableExpressionCreator;
+        }
+
         public string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var mapingExpression =
                 GetMappingExpressionFromDestinationPropToSourceProp(destinationPropertyName, destinationType, sourceType);
+            var x = mapingExpression.Compile();
+
             var expressionBodyString = mapingExpression.Body.ToString();
             var firstDotIndex = expressionBodyString.IndexOf(".") + 1;
             var propertyPath = expressionBodyString.Substring(firstDotIndex, expressionBodyString.Length - firstDotIndex);

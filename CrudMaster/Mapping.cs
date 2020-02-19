@@ -79,7 +79,7 @@ namespace CrudMaster
         {
             var propertiesOfEntity=typeof(TEntity).GetProperties().ToList();
             var propertiesToIgnore = propertiesOfEntity.GetPropertiesThatAreNotBaseTypes();
-
+            
             propertiesToIgnore.ForEach(property =>
             {
                 var expressionCreator = new LambdaExpressionCreator<TEntity>(property.Name);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using AutoMapper;
 using CrudMaster.Extensions;
@@ -187,9 +188,14 @@ namespace CrudMaster.Filter
         private Filter<TEntity> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
         {
             var filter = new Filter<TEntity>();
+            List<Delegate> x=new List<Delegate>();
             foreach (var filterRule in listOfFilters)
             {
-                var fullPropertyPath= _mappingService.GetPropertyPathInSourceType(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
+                var mapExp =
+                    _mappingService.GetMappingExpressionFromDestinationPropToSourceProp(filterRule["field"].ToString(),
+                        typeof(TQueryDto), typeof(TEntity));
+                x.Add(mapExp.Compile());
+                var fullPropertyPath = _mappingService.GetPropertyPathInSourceType(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
                 var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyPath);
                 var op = filterRule["op"].ToString();
                 IOperation operation = GetOperationByString(op);
