@@ -15,8 +15,8 @@ namespace CrudMasterApi.School
         List<SchoolQueryDto> List();
     }
 
-    public class SchoolService : GenericService<SchoolQueryDto,SchoolCommandDto,ISchoolRepository,Entities.School>,ISchoolService
-	{
+    public class SchoolService : GenericService<SchoolQueryDto, SchoolCommandDto, ISchoolRepository, Entities.School>, ISchoolService
+    {
         private readonly AccountingContext _db;
         public SchoolService(ISchoolRepository repository, AccountingContext db) : base(repository)
         {
@@ -24,63 +24,68 @@ namespace CrudMasterApi.School
         }
         public List<SchoolQueryDto> List()
         {
-            var cityNameMapping=MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
+            var cityNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
                 typeof(Entities.School));
 
             var nekiIntNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("NekiInt", typeof(SchoolQueryDto),
                 typeof(Entities.School));
 
-            ParameterExpression cityNameMapingParameter1 = cityNameMapping.Parameters[0];
-            ParameterExpression cityNameMapingParameter = Expression.Parameter(typeof(Entities.School), "s");
-            var x = cityNameMapingParameter == cityNameMapingParameter1;
+            ParameterExpression parameterExpression = Expression.Parameter(typeof(Entities.School), "s");
 
-            ConstantExpression value = Expression.Constant("Kovinski", typeof(string));
-            BinaryExpression equation = Expression.Equal(cityNameMapping.Body, value);
+            //ConstantExpression value = Expression.Constant("Kovinski", typeof(string));
+            //BinaryExpression equation = Expression.Equal(cityNameMapping.Body, value);
 
             ConstantExpression intValue = Expression.Constant(1, typeof(int));
-
-            var newExp = PredicateRewriter.Rewrite(nekiIntNameMapping, "s");
-
+            var newExp = ParameterExpressionReplacer.Replace(nekiIntNameMapping, parameterExpression);
+            var x = newExp.Parameters[0] == parameterExpression;
             BinaryExpression nekiIntEquation = Expression.Equal(newExp.Body, intValue);
+           
+            //BinaryExpression res = Expression.And(nekiIntEquation, equation);
+            //BinaryExpression test = Expression.Equal(cityNameMapping.Body, value);
 
-            BinaryExpression res = Expression.And(nekiIntEquation,equation);
-
-
-            BinaryExpression test = Expression.Equal(cityNameMapping.Body, value);
             Expression<Func<Entities.School, bool>> lambda1 =
                 Expression.Lambda<Func<Entities.School, bool>>(
                     nekiIntEquation,
-                    new ParameterExpression[] { cityNameMapingParameter });
+                    new ParameterExpression[] { parameterExpression });
 
-            var l=_db.Schools.Include("City").Where(lambda1).ToList();
+            var l = _db.Schools.Include("City").Where(lambda1).ToList();
             return null;
         }
 
     }
 
-    public class PredicateRewriter
+    public static class ParameterExpressionReplacer
     {
-        public static LambdaExpression Rewrite(LambdaExpression exp, string newParamName)
+        public static LambdaExpression Replace(LambdaExpression expression, ParameterExpression parameter)
         {
-            var param = Expression.Parameter(exp.Parameters[0].Type, newParamName);
-            var newExpression = new PredicateRewriterVisitor(param).Visit(exp);
+            return new ReplaceVisitor().Modify(expression, parameter);
+        }
+    }
 
-            return (LambdaExpression)newExpression;
+    public class ReplaceVisitor : ExpressionVisitor
+    {
+        private ParameterExpression parameter;
+
+        public LambdaExpression Modify(LambdaExpression expression, ParameterExpression parameter)
+        {
+            this.parameter = parameter;
+            return Visit(expression) as LambdaExpression;
         }
 
-        private class PredicateRewriterVisitor : ExpressionVisitor
+        protected override Expression VisitParameter(ParameterExpression node)
         {
-            private readonly ParameterExpression _parameterExpression;
-
-            public PredicateRewriterVisitor(ParameterExpression parameterExpression)
-            {
-                _parameterExpression = parameterExpression;
-            }
-
-            protected override Expression VisitParameter(ParameterExpression node)
-            {
-                return _parameterExpression;
-            }
+            return node;
         }
+
+        //protected override Expression VisitLambda<T>(Expression<T> node)
+        //{
+        //    return Expression.Lambda<Func<svc_JobAudit, bool>>(Visit(node.Body), Expression.Parameter(typeof(svc_JobAudit)));
+        //}
+
+        //protected override Expression VisitParameter(ParameterExpression node)
+        //{
+
+        //    return Expression.Property(parameter, "s");
+        //}
     }
 }
