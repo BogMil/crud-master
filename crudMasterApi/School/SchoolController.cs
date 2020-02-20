@@ -13,8 +13,8 @@ namespace CrudMasterApi.School
 
         public override ActionResult Get(Pager pager, OrderByProperties orderByProperties, string filters)
         {
-            Service.List();
-            return Ok();
+            var x=Service.List();
+            return Ok(x);
             //return base.Get(pager, orderByProperties, filters);
         }
     }

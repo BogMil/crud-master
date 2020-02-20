@@ -12,7 +12,7 @@ namespace CrudMasterApi.School
 {
     public interface ISchoolService : IGenericService<SchoolQueryDto, SchoolCommandDto>
     {
-        List<SchoolQueryDto> List();
+        List<Entities.School> List();
     }
 
     public class SchoolService : GenericService<SchoolQueryDto, SchoolCommandDto, ISchoolRepository, Entities.School>, ISchoolService
@@ -22,7 +22,7 @@ namespace CrudMasterApi.School
         {
             _db = db;
         }
-        public List<SchoolQueryDto> List()
+        public List<Entities.School> List()
         {
             var cityNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
                 typeof(Entities.School));
@@ -32,60 +32,49 @@ namespace CrudMasterApi.School
 
             ParameterExpression parameterExpression = Expression.Parameter(typeof(Entities.School), "s");
 
-            //ConstantExpression value = Expression.Constant("Kovinski", typeof(string));
-            //BinaryExpression equation = Expression.Equal(cityNameMapping.Body, value);
+            ConstantExpression value = Expression.Constant("Kovinski", typeof(string));
+            var cityNameMappingReplaced = ParameterExpressionReplacer.Replace(cityNameMapping, parameterExpression) as LambdaExpression;
+            BinaryExpression equation = Expression.Equal(cityNameMappingReplaced.Body, value);
 
             ConstantExpression intValue = Expression.Constant(1, typeof(int));
-            var newExp = ParameterExpressionReplacer.Replace(nekiIntNameMapping, parameterExpression);
-            var x = newExp.Parameters[0] == parameterExpression;
-            BinaryExpression nekiIntEquation = Expression.Equal(newExp.Body, intValue);
-           
-            //BinaryExpression res = Expression.And(nekiIntEquation, equation);
+            var nekiIntNameMappingReplaced = ParameterExpressionReplacer.Replace(nekiIntNameMapping, parameterExpression) as LambdaExpression;
+            BinaryExpression nekiIntEquation = Expression.Equal(nekiIntNameMappingReplaced.Body, intValue);
+
+            BinaryExpression res = Expression.And(nekiIntEquation, equation);
             //BinaryExpression test = Expression.Equal(cityNameMapping.Body, value);
 
             Expression<Func<Entities.School, bool>> lambda1 =
                 Expression.Lambda<Func<Entities.School, bool>>(
-                    nekiIntEquation,
+                    res,
                     new ParameterExpression[] { parameterExpression });
 
             var l = _db.Schools.Include("City").Where(lambda1).ToList();
-            return null;
+            return l;
         }
 
     }
 
     public static class ParameterExpressionReplacer
     {
-        public static LambdaExpression Replace(LambdaExpression expression, ParameterExpression parameter)
+        public static Expression Replace(Expression expression, ParameterExpression parameter)
         {
             return new ReplaceVisitor().Modify(expression, parameter);
         }
     }
 
-    public class ReplaceVisitor : ExpressionVisitor
+    class ReplaceVisitor : ExpressionVisitor
     {
         private ParameterExpression parameter;
 
-        public LambdaExpression Modify(LambdaExpression expression, ParameterExpression parameter)
+        public Expression Modify(Expression expression, ParameterExpression parameter)
         {
             this.parameter = parameter;
-            return Visit(expression) as LambdaExpression;
+            return Visit(expression);
         }
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            return node;
+            return parameter;
         }
-
-        //protected override Expression VisitLambda<T>(Expression<T> node)
-        //{
-        //    return Expression.Lambda<Func<svc_JobAudit, bool>>(Visit(node.Body), Expression.Parameter(typeof(svc_JobAudit)));
-        //}
-
-        //protected override Expression VisitParameter(ParameterExpression node)
-        //{
-
-        //    return Expression.Property(parameter, "s");
-        //}
     }
 }
