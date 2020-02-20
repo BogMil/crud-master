@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using CrudMaster;
 using CrudMaster.Service;
 using CrudMasterApi.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -54,27 +55,5 @@ namespace CrudMasterApi.School
 
     }
 
-    public static class ParameterExpressionReplacer
-    {
-        public static Expression Replace(Expression expression, ParameterExpression parameter)
-        {
-            return new ReplaceVisitor().Modify(expression, parameter);
-        }
-    }
-
-    class ReplaceVisitor : ExpressionVisitor
-    {
-        private ParameterExpression parameter;
-
-        public Expression Modify(Expression expression, ParameterExpression parameter)
-        {
-            this.parameter = parameter;
-            return Visit(expression);
-        }
-
-        protected override Expression VisitParameter(ParameterExpression node)
-        {
-            return parameter;
-        }
-    }
+   
 }

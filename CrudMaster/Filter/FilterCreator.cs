@@ -9,6 +9,8 @@ using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
 using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace CrudMaster.Filter
 {
@@ -148,7 +150,7 @@ namespace CrudMaster.Filter
 
     public static class FilterFactory
     {
-        public static Filter<TEntity> Create<TEntity, TQueryDto>(string filters) where TEntity : class where TQueryDto : class
+        public static Expression<Func<TEntity, bool>> Create<TEntity, TQueryDto>(string filters) where TEntity : class where TQueryDto : class
         {
             var filterCreator = new FilterCreatorTEST<TEntity,TQueryDto>(filters);
             return filterCreator.Create();
@@ -169,49 +171,64 @@ namespace CrudMaster.Filter
             ////GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
 
         }
-        public Filter<TEntity> Create()
+        public Expression<Func<TEntity, bool>> Create()
         {
-            if(string.IsNullOrEmpty(_filters))
-                return new Filter<TEntity>();
+            if (string.IsNullOrEmpty(_filters))
+                return null;
 
             var jsonFilters = _filters.TryParseJToken();
             return ParseExpressionFromJtoken(jsonFilters);
         }
 
-        private Filter<TEntity> ParseExpressionFromJtoken(JToken jsonFilters)
+        private Expression<Func<TEntity, bool>> ParseExpressionFromJtoken(JToken jsonFilters)
         {
             var groupConnector = GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
             var listOfFilters = (JArray)jsonFilters["rules"];
             return GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
         }
 
-        private Filter<TEntity> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
+        private Expression<Func<TEntity, bool>> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
         {
-            var filter = new Filter<TEntity>();
-            List<Delegate> x=new List<Delegate>();
+            //var filter = new Filter<TEntity>();
+            ParameterExpression parameterForAllExpressions = Expression.Parameter(typeof(TEntity), "s");
+            List<BinaryExpression> expressionsToAnd = new List<BinaryExpression>();
             foreach (var filterRule in listOfFilters)
             {
-                var mapExp =
+                var mappingExpression =
                     _mappingService.GetMappingExpressionFromDestinationPropToSourceProp(filterRule["field"].ToString(),
                         typeof(TQueryDto), typeof(TEntity));
-                x.Add(mapExp.Compile());
-                var fullPropertyPath = _mappingService.GetPropertyPathInSourceType(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
-                var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyPath);
-                var op = filterRule["op"].ToString();
-                IOperation operation = GetOperationByString(op);
                 var dataStr = filterRule["data"].ToString();
-                dynamic data = GetValidDataByOperationType(operation, dataStr, propertyType);
-                filter.By(fullPropertyPath, operation, data, groupConnector);
+                dynamic data = GetValidDataByOperationType(dataStr, mappingExpression.ReturnType);
+                ConstantExpression value = Expression.Constant(data, mappingExpression.ReturnType);
+                var mappingExpressionWithReplacedParameter = ParameterExpressionReplacer.Replace(mappingExpression, parameterForAllExpressions) as LambdaExpression;
+                BinaryExpression binaryExpression = Expression.Equal(mappingExpressionWithReplacedParameter.Body, value);
+                expressionsToAnd.Add(binaryExpression);
             }
 
-            return filter;
+            BinaryExpression res = Expression.AndAlso(expressionsToAnd[0], expressionsToAnd[1]);
+            BinaryExpression res2 = Expression.AndAlso(res, expressionsToAnd[2]);
+
+            return Expression.Lambda<Func<TEntity, bool>>(res2, parameterForAllExpressions);
         }
 
-        public object GetValidDataByOperationType(IOperation operation, string data, string propertyType)
+        public object GetValidDataByOperationType( string data, Type propertyType)
         {
-            switch (propertyType)
+            var propertyTypeFullName = propertyType.FullName;
+            if (propertyTypeFullName == typeof(int).FullName)
             {
+                if (int.TryParse(data, out var intData))
+                    return intData;
+                throw new Exception("Nije moguce izvriti konvertovanje u tip: " + propertyType);
+            }
 
+            if (propertyTypeFullName == typeof(string).FullName)
+            {
+                return data;
+            }
+
+
+            switch (propertyTypeFullName)
+            {
                 case "Int32":
                     if (int.TryParse(data, out var intData))
                         return intData;

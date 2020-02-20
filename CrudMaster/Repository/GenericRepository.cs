@@ -104,10 +104,10 @@ namespace CrudMaster.Repository
             Db.SaveChanges();
         }
 
-        public virtual IPagedList<TEntity> Filter(Pager pager, Filter<TEntity> filters, IOrderByProperties orderByProperties)
+        public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties)
         {
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
-            //listOfEntities = listOfEntities.Include("City.Region");
+            listOfEntities = listOfEntities.Include("City.Region");
 
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
             listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
