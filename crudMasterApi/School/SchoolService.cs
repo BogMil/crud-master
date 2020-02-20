@@ -23,23 +23,63 @@ namespace CrudMasterApi.School
         }
         public List<SchoolQueryDto> List()
         {
-            var x=MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
+            var cityNameMapping=MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
                 typeof(Entities.School));
-            var z = x.Compile();
 
-            //ParameterExpression numParam = Expression.Parameter(typeof(Entities.School), "s");
-            ParameterExpression numParam = x.Parameters[0];
+            var nekiIntNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("NekiInt", typeof(SchoolQueryDto),
+                typeof(Entities.School));
+
+            ParameterExpression cityNameMapingParameter1 = cityNameMapping.Parameters[0];
+            ParameterExpression cityNameMapingParameter = Expression.Parameter(typeof(Entities.School), "s");
+            var x = cityNameMapingParameter == cityNameMapingParameter1;
+
             ConstantExpression value = Expression.Constant("Kovinski", typeof(string));
-            BinaryExpression equation = Expression.Equal(x.Body, value);
+            BinaryExpression equation = Expression.Equal(cityNameMapping.Body, value);
+
+            ConstantExpression intValue = Expression.Constant(1, typeof(int));
+
+            var newExp = PredicateRewriter.Rewrite(nekiIntNameMapping, "s");
+
+            BinaryExpression nekiIntEquation = Expression.Equal(newExp.Body, intValue);
+
+            BinaryExpression res = Expression.And(nekiIntEquation,equation);
+
+
+            BinaryExpression test = Expression.Equal(cityNameMapping.Body, value);
             Expression<Func<Entities.School, bool>> lambda1 =
                 Expression.Lambda<Func<Entities.School, bool>>(
-                    equation,
-                    new ParameterExpression[] { numParam });
-
+                    nekiIntEquation,
+                    new ParameterExpression[] { cityNameMapingParameter });
 
             var l=_db.Schools.Include("City").Where(lambda1).ToList();
             return null;
         }
 
+    }
+
+    public class PredicateRewriter
+    {
+        public static LambdaExpression Rewrite(LambdaExpression exp, string newParamName)
+        {
+            var param = Expression.Parameter(exp.Parameters[0].Type, newParamName);
+            var newExpression = new PredicateRewriterVisitor(param).Visit(exp);
+
+            return (LambdaExpression)newExpression;
+        }
+
+        private class PredicateRewriterVisitor : ExpressionVisitor
+        {
+            private readonly ParameterExpression _parameterExpression;
+
+            public PredicateRewriterVisitor(ParameterExpression parameterExpression)
+            {
+                _parameterExpression = parameterExpression;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                return _parameterExpression;
+            }
+        }
     }
 }
