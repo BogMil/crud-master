@@ -9,6 +9,7 @@ namespace CrudMaster
     {
         public static IExpressionConnector GetExpressionConnector(string v)
         {
+            v = v.ToUpper();
             if(AndExpressionConnector.Value==v)
                 return new AndExpressionConnector();
 
@@ -21,12 +22,12 @@ namespace CrudMaster
 
     public interface IExpressionConnector
     {
-        BinaryExpression ConnectExpressions(BinaryExpression left, BinaryExpression right);
+        BinaryExpression Connect(BinaryExpression left, BinaryExpression right);
     }
     public class AndExpressionConnector : IExpressionConnector
     {
         public static string Value => "AND";
-        public BinaryExpression ConnectExpressions(BinaryExpression left, BinaryExpression right)
+        public BinaryExpression Connect(BinaryExpression left, BinaryExpression right)
         {
             return Expression.And(left, right);
         }
@@ -35,7 +36,7 @@ namespace CrudMaster
     public class OrExpressionConnector : IExpressionConnector
     {
         public static string Value => "OR";
-        public BinaryExpression ConnectExpressions(BinaryExpression left, BinaryExpression right)
+        public BinaryExpression Connect(BinaryExpression left, BinaryExpression right)
         {
             return Expression.And(left, right);
         }

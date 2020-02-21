@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using CrudMaster.Extensions;
 using CrudMaster.Filter;
 using CrudMaster.Repository;
 using CrudMaster.Sorter;
 using X.PagedList;
-using ExpressionBuilder.Generics;
 
 namespace CrudMaster.Service
 {

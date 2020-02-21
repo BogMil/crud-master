@@ -1,217 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using AutoMapper;
-using CrudMaster.Extensions;
-using CrudMaster.PropertyMapper;
 using ExpressionBuilder.Common;
-using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
 using Newtonsoft.Json.Linq;
-using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace CrudMaster.Filter
 {
-    //public class FilterCreator<TEntity, TPropertyMapper> where TEntity : class where TPropertyMapper:class,IPropertyMapper<TEntity>,new()
-    //{
-    //    public Filter<TEntity> Create(JToken jsonFilters)
-    //    {
-    //        return ParseExpressionFromJtoken(jsonFilters);
-    //    }
-
-    //    private Filter<TEntity> ParseExpressionFromJtoken(JToken jsonFilters)
-    //    {
-    //        var groupConnector = GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
-    //        var listOfFilters = (JArray)jsonFilters["rules"];
-    //        return GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
-    //    }
-
-    //    private Filter<TEntity> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
-    //    {
-    //        var filter = new Filter<TEntity>();
-    //        foreach (var filterRule in listOfFilters)
-    //        {
-    //            var fullPropertyName = GetEfPropertyPathByDtoField(filterRule["field"].ToString());
-    //            var propertyType = PropertyTypeExtractor<TEntity>.GetPropertyTypeName(fullPropertyName);
-    //            var op = filterRule["op"].ToString();
-    //            IOperation operation = GetOperationByString(op);
-    //            var dataStr = filterRule["data"].ToString();
-    //            dynamic data = GetValidDataByOperationType(operation,dataStr,propertyType);
-    //            filter.By(fullPropertyName, operation, data, groupConnector);
-    //        }
-
-    //        return filter;
-    //    }
-
-    //    private object GetValidDataByOperationType(IOperation operation,string data,string propertyType)
-    //    {
-    //        switch (propertyType)
-    //        {
-
-    //            case "Int32":
-    //                if (int.TryParse(data, out var intData))
-    //                    return intData;
-    //                throw new Exception("Nije moguce izvriti konvertovanje u tip: " +propertyType);
-
-    //            case "Nullable.Int32":
-    //                if (int.TryParse(data, out var nullableIntData))
-    //                    return nullableIntData;
-    //                return null;
-
-    //            case "Int64":
-    //                if (long.TryParse(data, out var longData))
-    //                    return longData;
-    //                throw new Exception("Nije moguce izvriti konvertovanje u tip: " + propertyType);
-
-    //            case "Nullable.Int64":
-    //                if (long.TryParse(data, out var nullableLongData))
-    //                    return nullableLongData;
-    //                throw new Exception("Nije moguce izvriti konvertovanje u tip: " + propertyType);
-
-    //            case "Double":
-    //                if (double.TryParse(data, out var doubleData))
-    //                    return doubleData;
-    //                throw new Exception("Nije moguce izvriti konvertovanje u tip: " + propertyType);
-
-    //            case "Nullable.Double":
-    //                if (double.TryParse(data, out var nullableDoubleData))
-    //                    return nullableDoubleData;
-    //                return null;
-
-    //            case "String":
-    //                return data;
-
-    //            case "DateTime":
-    //                if (DateTime.TryParse(data, out var dateTimeData))
-    //                    return dateTimeData;
-    //                throw new Exception("Nije moguce izvriti konvertovanje u tip: " + propertyType);
-
-    //            case "Nullable.DateTime":
-    //                if (DateTime.TryParse(data, out var nullableDateTimeData))
-    //                    return nullableDateTimeData;
-    //                return null;
-
-
-    //            default:
-    //                throw new Exception("Nije podrzano kastovanje podatka za pretragu za propertyType : "+propertyType);
-    //        }
-    //    }
-
-    //    private string GetEfPropertyPathByDtoField(string dtoField)
-    //    {
-    //        var propertyMapper = new TPropertyMapper();
-    //        var expresisonMember = propertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoField);
-    //        return expresisonMember.GetExpressionBodyAsString();
-    //    }
-
-    //    private Connector GetGroupConnectorFromString(string groupConnector)
-    //    {
-    //        return groupConnector == "AND" ? Connector.And : Connector.Or;
-    //    }
-
-    //    private IOperation GetOperationByString(string operation)
-    //    {
-    //        try{
-    //            switch (operation)
-    //            {
-    //                case "eq":
-    //                    return Operation.EqualTo;
-    //                case "ne":
-    //                    return Operation.NotEqualTo;
-    //                case "lt":
-    //                    return Operation.LessThan;
-    //                case "le":
-    //                    return Operation.LessThanOrEqualTo;
-    //                case "gt":
-    //                    return Operation.GreaterThan;
-    //                case "ge":
-    //                    return Operation.GreaterThanOrEqualTo;
-    //                case "bw":
-    //                    return Operation.StartsWith;
-    //                case "ew":
-    //                    return Operation.EndsWith;
-    //                case "cn":
-    //                    return Operation.Contains;
-    //                case "nc":
-    //                    return Operation.DoesNotContain;
-    //                default:
-    //                    throw new Exception("Nepostojeca operacija " + operation + ". Dozvoljene operacije su:eq,ne,lt,lt,gt,ge,bw,ew,cn,nc.");
-    //            }
-    //        }
-    //        catch(Exception e)
-    //        {
-    //            throw e;
-    //        }
-            
-    //    }
-    //}
+    
 
     public static class FilterFactory
     {
         public static Expression<Func<TEntity, bool>> Create<TEntity, TQueryDto>(string filters) where TEntity : class where TQueryDto : class
         {
-            var filterCreator = new FilterCreatorTEST<TEntity,TQueryDto>(filters);
+            var filterCreator = new FilterCreator<TEntity,TQueryDto>(filters);
             return filterCreator.Create();
         }
     }
-    public class FilterCreatorTEST<TEntity,TQueryDto> where TEntity : class where TQueryDto: class
+    public class FilterCreator<TEntity,TQueryDto> where TEntity : class where TQueryDto: class
     {
-        private string _filters { get; set; }
+        private FilterObject FilterObject { get; set; }
         //public JToken JsonFilters{ get; set; }
         private readonly IMappingService _mappingService;
-        public FilterCreatorTEST(string filters )
+        public FilterCreator(string filters )
         {
-            _filters = filters;
+            FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
             _mappingService = new MappingService();
-            //JsonFilters = filters.TryParseJToken();
-            //var groupConnector = GetGroupConnectorFromString(JsonFilters["groupOp"].ToString());
-            //var listOfFilters = (JArray)JsonFilters["rules"];
-            ////GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
-
         }
         public Expression<Func<TEntity, bool>> Create()
         {
-            if (string.IsNullOrEmpty(_filters))
-                return null;
-
-            var jsonFilters = _filters.TryParseJToken();
-            return ParseExpressionFromJtoken(jsonFilters);
-        }
-
-        private Expression<Func<TEntity, bool>> ParseExpressionFromJtoken(JToken jsonFilters)
-        {
-            var groupConnector = GetGroupConnectorFromString(jsonFilters["groupOp"].ToString());
-            var listOfFilters = (JArray)jsonFilters["rules"];
-            return GetExpressionFromListOfStringFilters(listOfFilters, groupConnector);
-        }
-
-        private Expression<Func<TEntity, bool>> GetExpressionFromListOfStringFilters(JArray listOfFilters, Connector groupConnector)
-        {
-            //var filter = new Filter<TEntity>();
             ParameterExpression parameterForAllExpressions = Expression.Parameter(typeof(TEntity), "s");
             List<BinaryExpression> expressionsToAnd = new List<BinaryExpression>();
-            foreach (var filterRule in listOfFilters)
+            foreach (var filterRule in FilterObject.Rules)
             {
-                var mappingExpression = _mappingService.GetPropertyMappingExpression(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
-                var dataStr = filterRule["data"].ToString();
-                dynamic data = GetValidDataByOperationType(dataStr, mappingExpression.ReturnType);
-                ConstantExpression value = Expression.Constant(data, mappingExpression.ReturnType);
-                var mappingExpressionWithReplacedParameter = ParameterExpressionReplacer.Replace(mappingExpression, parameterForAllExpressions) as LambdaExpression;
-                BinaryExpression binaryExpression = Expression.Equal(mappingExpressionWithReplacedParameter.Body, value);
+                var mappingExpression = new MappingExpression<TQueryDto, TEntity>(filterRule.Field);
+                mappingExpression.ReplaceParameter(parameterForAllExpressions);
+
+                ConstantExpression value =
+                    CreateConstantExpressionFromStringData(filterRule.Data, mappingExpression.ReturnType);
+
+                BinaryExpression binaryExpression = Expression.Equal(mappingExpression.Body, value);
                 expressionsToAnd.Add(binaryExpression);
             }
 
-            BinaryExpression res = Expression.And(expressionsToAnd[0], expressionsToAnd[1]);
-            BinaryExpression res2 = Expression.And(res, expressionsToAnd[2]);
+            var expressionConnector = ExpressionConnectors.GetExpressionConnector(FilterObject.GroupOp);
+            var res = expressionConnector.Connect(expressionsToAnd[0], expressionsToAnd[1]);
+            var res2 = expressionConnector.Connect(res, expressionsToAnd[2]);
 
             return Expression.Lambda<Func<TEntity, bool>>(res2, parameterForAllExpressions);
         }
 
-        public object GetValidDataByOperationType( string data, Type propertyType)
+        public ConstantExpression CreateConstantExpressionFromStringData(string data,Type type)
+        {
+            dynamic castedData= GetValidDataByOperationType(data, type);
+            return Expression.Constant(castedData, type);
+        }
+
+        public object GetValidDataByOperationType(string data, Type propertyType)
         {
             var propertyTypeFullName = propertyType.FullName;
+
             if (propertyTypeFullName == typeof(int).FullName)
             {
                 if (int.TryParse(data, out var intData))
@@ -276,18 +127,6 @@ namespace CrudMaster.Filter
             }
         }
 
-        private string GetEfPropertyPathByDtoField(string dtoField)
-        {
-            //var propertyMapper = new TPropertyMapper();
-            //var expresisonMember = propertyMapper.GetCorespondingPropertyNavigationInEntityForDtoField(dtoField);
-            //return expresisonMember.GetExpressionBodyAsString();
-            return "";
-        }
-
-        public Connector GetGroupConnectorFromString(string groupConnector)
-        {
-            return groupConnector == "AND" ? Connector.And : Connector.Or;
-        }
 
         public IOperation GetOperationByString(string operation)
         {
