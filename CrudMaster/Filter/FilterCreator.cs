@@ -194,9 +194,7 @@ namespace CrudMaster.Filter
             List<BinaryExpression> expressionsToAnd = new List<BinaryExpression>();
             foreach (var filterRule in listOfFilters)
             {
-                var mappingExpression =
-                    _mappingService.GetMappingExpressionFromDestinationPropToSourceProp(filterRule["field"].ToString(),
-                        typeof(TQueryDto), typeof(TEntity));
+                var mappingExpression = _mappingService.GetPropertyMappingExpression(filterRule["field"].ToString(), typeof(TQueryDto), typeof(TEntity));
                 var dataStr = filterRule["data"].ToString();
                 dynamic data = GetValidDataByOperationType(dataStr, mappingExpression.ReturnType);
                 ConstantExpression value = Expression.Constant(data, mappingExpression.ReturnType);
@@ -205,8 +203,8 @@ namespace CrudMaster.Filter
                 expressionsToAnd.Add(binaryExpression);
             }
 
-            BinaryExpression res = Expression.AndAlso(expressionsToAnd[0], expressionsToAnd[1]);
-            BinaryExpression res2 = Expression.AndAlso(res, expressionsToAnd[2]);
+            BinaryExpression res = Expression.And(expressionsToAnd[0], expressionsToAnd[1]);
+            BinaryExpression res2 = Expression.And(res, expressionsToAnd[2]);
 
             return Expression.Lambda<Func<TEntity, bool>>(res2, parameterForAllExpressions);
         }

@@ -14,7 +14,7 @@ namespace CrudMaster
         IMapper Mapper { get; set; }
         TypeMap GetTypeMapFor(Type sourceType, Type destinationType);
 
-        LambdaExpression GetMappingExpressionFromDestinationPropToSourceProp(string destinationPropertyName,
+        LambdaExpression GetPropertyMappingExpression(string destinationPropertyName,
             Type destinationType, Type sourceType);
 
         string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType);
@@ -44,7 +44,7 @@ namespace CrudMaster
         }
 
 
-        public LambdaExpression GetMappingExpressionFromDestinationPropToSourceProp(string destinationPropertyName, Type destinationType, Type sourceType)
+        public LambdaExpression GetPropertyMappingExpression(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
            
@@ -75,7 +75,7 @@ namespace CrudMaster
         public string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var mapingExpression =
-                GetMappingExpressionFromDestinationPropToSourceProp(destinationPropertyName, destinationType, sourceType);
+                GetPropertyMappingExpression(destinationPropertyName, destinationType, sourceType);
             var x = mapingExpression.Compile();
 
             var expressionBodyString = mapingExpression.Body.ToString();

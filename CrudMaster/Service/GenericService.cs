@@ -49,7 +49,7 @@ namespace CrudMaster.Service
             {
                 if (!dtoColumnName.Contains("."))
                 {
-                    var exp = MappingService.GetMappingExpressionFromDestinationPropToSourceProp(dtoColumnName, queryDtoOfLinkedTable, typeOfLinkedTable);
+                    var exp = MappingService.GetPropertyMappingExpression(dtoColumnName, queryDtoOfLinkedTable, typeOfLinkedTable);
                     template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(), exp);
                 }
                 else

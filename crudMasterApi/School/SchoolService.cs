@@ -25,10 +25,10 @@ namespace CrudMasterApi.School
         }
         public List<Entities.School> List()
         {
-            var cityNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("CityName", typeof(SchoolQueryDto),
+            var cityNameMapping = MappingService.GetPropertyMappingExpression("CityName", typeof(SchoolQueryDto),
                 typeof(Entities.School));
 
-            var nekiIntNameMapping = MappingService.GetMappingExpressionFromDestinationPropToSourceProp("NekiInt", typeof(SchoolQueryDto),
+            var nekiIntNameMapping = MappingService.GetPropertyMappingExpression("NekiInt", typeof(SchoolQueryDto),
                 typeof(Entities.School));
 
             ParameterExpression parameterExpression = Expression.Parameter(typeof(Entities.School), "s");
