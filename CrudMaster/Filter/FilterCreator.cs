@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using ExpressionBuilder.Common;
-using ExpressionBuilder.Interfaces;
-using ExpressionBuilder.Operations;
 using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
+using ExpressionBuilder;
 
 namespace CrudMaster.Filter
 {
@@ -23,37 +21,45 @@ namespace CrudMaster.Filter
     public class FilterCreator<TEntity,TQueryDto> where TEntity : class where TQueryDto: class
     {
         private FilterObject FilterObject { get; set; }
-        //public JToken JsonFilters{ get; set; }
         private readonly IMappingService _mappingService;
+        private readonly ParameterExpression _parameterExpression= Expression.Parameter(typeof(TEntity), "s");
+        private readonly IExpressionBuilder _expressionBuilder;
+
         public FilterCreator(string filters )
         {
             FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
             _mappingService = new MappingService();
+            _expressionBuilder= new ExprBuilder();
         }
+
         public Expression<Func<TEntity, bool>> Create()
         {
-            ParameterExpression parameterForAllExpressions = Expression.Parameter(typeof(TEntity), "s");
-            List<BinaryExpression> expressionsToAnd = new List<BinaryExpression>();
-            foreach (var filterRule in FilterObject.Rules)
-            {
-                var mappingExpression = new MappingExpression<TQueryDto, TEntity>(filterRule.Field);
-                mappingExpression.ReplaceParameter(parameterForAllExpressions);
-
-                ConstantExpression value =
-                    CreateConstantExpressionFromStringData(filterRule.Data, mappingExpression.ReturnType);
-
-                BinaryExpression binaryExpression = Expression.Equal(mappingExpression.Body, value);
-                expressionsToAnd.Add(binaryExpression);
-            }
-
-            var expressionConnector = ExpressionConnectors.GetExpressionConnector(FilterObject.GroupOp);
-            var res = expressionConnector.Connect(expressionsToAnd[0], expressionsToAnd[1]);
-            var res2 = expressionConnector.Connect(res, expressionsToAnd[2]);
-
-            return Expression.Lambda<Func<TEntity, bool>>(res2, parameterForAllExpressions);
+            return Create(FilterObject);
         }
 
-        public ConstantExpression CreateConstantExpressionFromStringData(string data,Type type)
+        public Expression<Func<TEntity, bool>> Create(FilterObject filterObject)
+        {
+            List<BinaryExpression> expressionsToCombine= new List<BinaryExpression>();
+
+            foreach (var filterRule in filterObject.Rules)
+            {
+                var mappingExpression = new MappingExpression<TQueryDto, TEntity>(filterRule.Field);
+                mappingExpression.ReplaceParameter(_parameterExpression);
+
+                ConstantExpression value = CreateConstantExpression(filterRule.Data, mappingExpression.ReturnType);
+
+                //BinaryExpression binaryExpression = Expression.Equal(mappingExpression.Body, value);
+                BinaryExpression binaryExpression = _expressionBuilder.Create(mappingExpression.Body,filterRule.Op ,value);
+                expressionsToCombine.Add(binaryExpression);
+            }
+
+            var res = _expressionBuilder.Combine(expressionsToCombine[0], filterObject.GroupOp, expressionsToCombine[1]);
+            var res2 = _expressionBuilder.Combine(res, filterObject.GroupOp,expressionsToCombine[2]);
+
+            return Expression.Lambda<Func<TEntity, bool>>(res2, _parameterExpression);
+        }
+
+        public ConstantExpression CreateConstantExpression(string data,Type type)
         {
             dynamic castedData= GetValidDataByOperationType(data, type);
             return Expression.Constant(castedData, type);
@@ -125,44 +131,6 @@ namespace CrudMaster.Filter
                 default:
                     throw new Exception("Nije podrzano kastovanje podatka za pretragu za propertyType : " + propertyType);
             }
-        }
-
-
-        public IOperation GetOperationByString(string operation)
-        {
-            try
-            {
-                switch (operation)
-                {
-                    case "eq":
-                        return Operation.EqualTo;
-                    case "ne":
-                        return Operation.NotEqualTo;
-                    case "lt":
-                        return Operation.LessThan;
-                    case "le":
-                        return Operation.LessThanOrEqualTo;
-                    case "gt":
-                        return Operation.GreaterThan;
-                    case "ge":
-                        return Operation.GreaterThanOrEqualTo;
-                    case "bw":
-                        return Operation.StartsWith;
-                    case "ew":
-                        return Operation.EndsWith;
-                    case "cn":
-                        return Operation.Contains;
-                    case "nc":
-                        return Operation.DoesNotContain;
-                    default:
-                        throw new Exception("Nepostojeca operacija " + operation + ". Dozvoljene operacije su:eq,ne,lt,lt,gt,ge,bw,ew,cn,nc.");
-                }
-            }
-            catch (ReflectionTypeLoadException e)
-            {
-                throw e;
-            }
-
         }
     }
 }

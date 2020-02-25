@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMasterApi", "crudMaster
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMaster", "CrudMaster\CrudMaster.csproj", "{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionBuilder", "ExpressionBuilder\ExpressionBuilder.csproj", "{60F6443B-16EC-4C42-870B-F9D33B3AD45D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
