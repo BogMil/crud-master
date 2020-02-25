@@ -5,9 +5,9 @@ namespace ExpressionBuilder.ExpressionCombiners.Implementations
     public class Or: IExpressionCombine
     {
         public static string Value => ExpressionCombiner.Or;
-        public BinaryExpression Combine(BinaryExpression left, BinaryExpression right)
+        public BinaryExpression Combine(Expression left, Expression right)
         {
-            return Expression.And(left, right);
+            return Expression.Or(left, right);
         }
     }
 }

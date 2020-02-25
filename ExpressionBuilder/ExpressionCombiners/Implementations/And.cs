@@ -5,7 +5,7 @@ namespace ExpressionBuilder.ExpressionCombiners.Implementations
     public class And: IExpressionCombine
     {
         public static string Value => ExpressionCombiner.And;
-        public BinaryExpression Combine(BinaryExpression left, BinaryExpression right)
+        public BinaryExpression Combine(Expression left, Expression right)
         {
             return Expression.And(left, right);
         }

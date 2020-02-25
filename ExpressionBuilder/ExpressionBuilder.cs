@@ -9,19 +9,19 @@ namespace ExpressionBuilder
 {
     public interface IExpressionBuilder
     {
-        BinaryExpression Combine(BinaryExpression left, string operation, BinaryExpression right);
-        BinaryExpression Create(Expression left, string operation, ConstantExpression right);
+        Expression Combine(Expression left, string operation, Expression right);
+        Expression Create(Expression left, string operation, ConstantExpression right);
     }
 
     public class ExprBuilder : IExpressionBuilder
     {
-        public BinaryExpression Combine(BinaryExpression left, string operation, BinaryExpression right)
+        public Expression Combine(Expression left, string operation, Expression right)
         {
             var ec = ExpressionCombinerFactory.GetExpressionConnector(operation);
             return ec.Combine(left, right);
         }
 
-        public BinaryExpression Create(Expression left, string operation, ConstantExpression right)
+        public Expression Create(Expression left, string operation, ConstantExpression right)
         {
             var ec = ExpressionCreatorFactory.Get(operation);
             return ec.Create(left, right);

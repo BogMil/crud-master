@@ -5,13 +5,13 @@ namespace ExpressionBuilder.ExpressionCombiners
 {
     internal static class ExpressionCombinerFactory
     {
-        public static IExpressionCombine GetExpressionConnector(string v)
+        public static IExpressionCombine GetExpressionConnector(string operation)
         {
-            v = v.ToUpper();
-            if (And.Value == v)
+            operation = operation.ToUpper();
+            if (And.Value == operation)
                 return new And();
 
-            if (Or.Value == v)
+            if (Or.Value == operation)
                 return new Or();
 
             throw new Exception("Nepostojeca operacija");

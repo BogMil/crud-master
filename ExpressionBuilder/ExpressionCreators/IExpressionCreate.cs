@@ -7,6 +7,6 @@ namespace ExpressionBuilder.ExpressionCreators
 {
     interface IExpressionCreate
     {
-        BinaryExpression Create(Expression left, ConstantExpression right);
+        Expression Create(Expression left, ConstantExpression right);
     }
 }

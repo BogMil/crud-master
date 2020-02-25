@@ -7,6 +7,6 @@ namespace ExpressionBuilder.ExpressionCombiners
 {
     public interface IExpressionCombine
     {
-        BinaryExpression Combine(BinaryExpression left, BinaryExpression right);
+        BinaryExpression Combine(Expression left, Expression right);
     }
 }

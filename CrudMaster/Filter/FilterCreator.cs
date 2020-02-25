@@ -39,7 +39,7 @@ namespace CrudMaster.Filter
 
         public Expression<Func<TEntity, bool>> Create(FilterObject filterObject)
         {
-            List<BinaryExpression> expressionsToCombine= new List<BinaryExpression>();
+            var expressionsToCombine= new List<Expression>();
 
             foreach (var filterRule in filterObject.Rules)
             {
@@ -49,7 +49,7 @@ namespace CrudMaster.Filter
                 ConstantExpression value = CreateConstantExpression(filterRule.Data, mappingExpression.ReturnType);
 
                 //BinaryExpression binaryExpression = Expression.Equal(mappingExpression.Body, value);
-                BinaryExpression binaryExpression = _expressionBuilder.Create(mappingExpression.Body,filterRule.Op ,value);
+                var binaryExpression = _expressionBuilder.Create(mappingExpression.Body,filterRule.Op ,value);
                 expressionsToCombine.Add(binaryExpression);
             }
 
