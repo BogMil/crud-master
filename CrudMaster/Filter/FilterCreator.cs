@@ -48,7 +48,7 @@ namespace CrudMaster.Filter
             for (var i = 1; i < expressionsToCombine.Count; i++)
                 combinedRulesResult = _expressionBuilder.Combine(combinedRulesResult, filterObject.GroupOp, expressionsToCombine[i]);
 
-            return Expression.Lambda<Func<TEntity, bool>>(combinedRulesResult, _parameterExpression);
+            return combinedRulesResult!=null ? Expression.Lambda<Func<TEntity, bool>>(combinedRulesResult, _parameterExpression) : null;
         }
 
         public Expression CreateExpressionByRule(Rule filterRule)
