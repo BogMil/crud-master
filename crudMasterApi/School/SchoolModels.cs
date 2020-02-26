@@ -44,8 +44,6 @@ namespace CrudMasterApi.School
             entityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
 
             CommandDtoToEntity.Add(d => d.CityId, o => o.MapFrom(s => s.DtoCityId));
-            //CommandDtoToEntity.Add(d => d.City, o => o.Ignore());
-            //CommandDtoToEntity.Add(d => d.Modules, o => o.Ignore());
         }
     }
 }
