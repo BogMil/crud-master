@@ -10,9 +10,9 @@ namespace CrudMaster.Filter
         [JsonPropertyName("groupOp")]
         public string GroupOp { get; set; }
         [JsonPropertyName("rules")]
-        public Rule[] Rules { get; set; }
+        public List<Rule> Rules { get; set; }
         [JsonPropertyName("groups")]
-        public FilterObject[] Groups { get; set; }
+        public List<FilterObject> Groups { get; set; }
     }
 
     public class Rule
