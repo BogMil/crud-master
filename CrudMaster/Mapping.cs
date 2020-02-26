@@ -90,6 +90,8 @@ namespace CrudMaster
         public abstract void PopulateMps(Dictionary<Expression<Func<TQueryDto, dynamic>>,
             Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> entityToQueryDto );
 
+        //public abstract Dictionary<Expression<Func<TQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> FromEntityToQueryDto();
+
         public void ValidateMapsFromEntityToQueryDto()
         {
             foreach (var (key, value) in _entityToQueryDto)
