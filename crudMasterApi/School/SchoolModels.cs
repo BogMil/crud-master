@@ -60,7 +60,7 @@ namespace CrudMasterApi.School
     {
         ITo<TSource, TDestination> From(Expression<Func<TSource, dynamic>> fromExpression);
 
-        public Dictionary<Expression<Func<TDestination, dynamic>>,
+        Dictionary<Expression<Func<TDestination, dynamic>>,
             Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> _entityToQueryDto
         {
             get;
