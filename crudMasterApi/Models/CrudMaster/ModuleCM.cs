@@ -46,14 +46,19 @@ namespace CrudMasterApi.Models.CrudMaster
     //    }
     //}
 
-    public class ModuleMappingProfile : CrudMasterMappingProfile<ModuleQueryDto, ModuleCommandDto, Module>
-    {
-        public override void PopulateMps(Dictionary<Expression<Func<ModuleQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Module, ModuleQueryDto, dynamic>>>> entityToQueryDto)
-        {
-            entityToQueryDto.Add(d => d.School, o => o.MapFrom(s => s.School));
+    //public class ModuleMappingProfile : CrudMasterMappingProfile<ModuleQueryDto, ModuleCommandDto, Module>
+    //{
+    //    public override void PopulateMps(Dictionary<Expression<Func<ModuleQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Module, ModuleQueryDto, dynamic>>>> entityToQueryDto)
+    //    {
+    //        entityToQueryDto.Add(d => d.School, o => o.MapFrom(s => s.School));
 
-            CommandDtoToEntity.Add(s => s.School, o => o.Ignore());
-            CommandDtoToEntity.Add(s => s.SubjectsOfModule, o => o.Ignore());
-        }
-    }
+    //        CommandDtoToEntity.Add(s => s.School, o => o.Ignore());
+    //        CommandDtoToEntity.Add(s => s.SubjectsOfModule, o => o.Ignore());
+    //    }
+
+    //    public override void ConfigureEntityToQueryDtoMap(IMapFrom<Module, ModuleQueryDto> map)
+    //    {
+            
+    //    }
+    //}
 }

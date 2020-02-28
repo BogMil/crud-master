@@ -43,14 +43,18 @@ namespace CrudMasterApi.Models.CrudMaster
     //    }
     //}
 
-    public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
-    {
-        public override void PopulateMps(Dictionary<Expression<Func<RegionQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Region, RegionQueryDto, dynamic>>>> entityToQueryDto)
-        {
-            entityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
+    //public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
+    //{
+    //    public override void PopulateMps(Dictionary<Expression<Func<RegionQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Region, RegionQueryDto, dynamic>>>> entityToQueryDto)
+    //    {
+    //        entityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
 
-            CommandDtoToEntity.Add(s => s.Cities, o => o.Ignore());
-            CommandDtoToEntity.Add(s => s.TestInt, o => o.MapFrom(d => d.NekiInt));
-        }
-    }
+    //        CommandDtoToEntity.Add(s => s.Cities, o => o.Ignore());
+    //        CommandDtoToEntity.Add(s => s.TestInt, o => o.MapFrom(d => d.NekiInt));
+    //    }
+
+    //    public override void ConfigureEntityToQueryDtoMap(IMapFrom<Region, RegionQueryDto> map)
+    //    {
+    //    }
+    //}
 }

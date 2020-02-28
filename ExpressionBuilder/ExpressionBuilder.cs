@@ -50,6 +50,11 @@ namespace ExpressionBuilder
                 return data;
             }
 
+            if (propertyTypeFullName == typeof(object).FullName)
+            {
+                return data as object;
+            }
+
 
             switch (propertyTypeFullName)
             {

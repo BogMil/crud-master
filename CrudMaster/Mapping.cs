@@ -57,7 +57,7 @@ namespace CrudMaster
         {
 
 
-            //PopulateMps(_entityToQueryDto);
+            PopulateMps(_entityToQueryDto);
             ValidateMapsFromEntityToQueryDto();
 
             CreateMappingFromEntityToQueryDto();
@@ -79,7 +79,9 @@ namespace CrudMaster
             ConfigureEntityToQueryDtoMap(entityToQueryDtoMapper.ToConfigurable());
 
             var entityToQueryDtoMap = CreateMap<TEntity, TQueryDto>();
-            foreach (var (key, value) in _entityToQueryDto)
+            var x = _entityToQueryDto.ToList()[2];
+            var y = entityToQueryDtoMapper.GetMappings().ToList()[2];
+            foreach (var (key, value) in entityToQueryDtoMapper.GetMappings())
             {
                 entityToQueryDtoMap.ForMember(key, value.Compile());
             }

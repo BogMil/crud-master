@@ -41,7 +41,7 @@ namespace CrudMasterApi
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
-            services.AddSingleton(new AutoMapperConfiguration().Configure());
+            //services.AddSingleton(new AutoMapperConfiguration().Configure());
             //services.AddSingleton<TranslationTransformer>();
 
             services.AddDbContext<AccountingContext>(options => options.UseLazyLoadingProxies().UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
