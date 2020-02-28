@@ -42,45 +42,38 @@ namespace CrudMaster
 
     public abstract class CrudMasterMappingProfile<TQueryDto, TCommandDto, TEntity> : Profile where TQueryDto : class where TEntity : class where TCommandDto : class
     {
-        private Dictionary<Expression<Func<TQueryDto, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> _entityToQueryDto =
-            new Dictionary<Expression<Func<TQueryDto, dynamic>>,
-                Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>>();
-
-        public Dictionary<Expression<Func<TEntity, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity, dynamic>>>> CommandDtoToEntity =
-            new Dictionary<Expression<Func<TEntity, dynamic>>,
-                Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity, dynamic>>>>();
-
 
         protected CrudMasterMappingProfile()
         {
-
-
-            PopulateMps(_entityToQueryDto);
             ValidateMapsFromEntityToQueryDto();
 
             CreateMappingFromEntityToQueryDto();
 
-            var commandDtoToEntityMap = CreateMap<TCommandDto, TEntity>();
-            IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(commandDtoToEntityMap);
-            foreach (var (key, value) in CommandDtoToEntity)
-            {
-                commandDtoToEntityMap.ForMember(key, value.Compile());
-            }
+            CreateMappingToEntityFromCommandDto();
 
             CreateMap<PagedList<TEntity>, StaticPagedList<TQueryDto>>()
                 .ConvertUsing<PagedListConverter<TEntity, TQueryDto>>();
         }
 
+        private void CreateMappingToEntityFromCommandDto()
+        {
+            var commandDtoToEntityMapperCreator = MapCreatorFactory<TCommandDto,TEntity>.Create();
+            MapToEntityFromCommandDto(commandDtoToEntityMapperCreator.ToConfigurable());
+
+            var commandDtoToEntityMap = CreateMap<TCommandDto, TEntity>();
+            IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(commandDtoToEntityMap);
+            foreach (var (key, value) in commandDtoToEntityMapperCreator.GetMappings())
+            {
+                commandDtoToEntityMap.ForMember(key, value.Compile());
+            }
+        }
+
         private void CreateMappingFromEntityToQueryDto()
         {
             var entityToQueryDtoMapper = MapCreatorFactory<TEntity, TQueryDto>.Create();
-            ConfigureEntityToQueryDtoMap(entityToQueryDtoMapper.ToConfigurable());
+            MapToQueryDtoFromEntity(entityToQueryDtoMapper.ToConfigurable());
 
             var entityToQueryDtoMap = CreateMap<TEntity, TQueryDto>();
-            var x = _entityToQueryDto.ToList()[2];
-            var y = entityToQueryDtoMapper.GetMappings().ToList()[2];
             foreach (var (key, value) in entityToQueryDtoMapper.GetMappings())
             {
                 entityToQueryDtoMap.ForMember(key, value.Compile());
@@ -99,28 +92,26 @@ namespace CrudMaster
             });
         }
 
-        public abstract void PopulateMps(Dictionary<Expression<Func<TQueryDto, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> entityToQueryDto);
-
-        public abstract void ConfigureEntityToQueryDtoMap(IMapFrom<TEntity, TQueryDto> map);
+        public abstract void MapToQueryDtoFromEntity(IMapTo<TEntity, TQueryDto> map);
+        public abstract void MapToEntityFromCommandDto(IMapTo<TCommandDto, TEntity> map);
 
         public void ValidateMapsFromEntityToQueryDto()
         {
-            foreach (var (key, value) in _entityToQueryDto)
-            {
-                var mapFromT = ".MapFrom(";
-                var x = value.ToString();
+            //foreach (var (key, value) in _entityToQueryDto)
+            //{
+            //    var mapFromT = ".MapFrom(";
+            //    var x = value.ToString();
 
-                if (x.Contains(mapFromT))
-                {
-                    var q = (value.Body as MethodCallExpression).Arguments[0];
-                    var w = (q as UnaryExpression).Operand;//just check return type
-                    CheckExpressionByNodeType(w);
-                    var index = x.IndexOf(mapFromT) + mapFromT.Length;
-                    var end = x.Length - index - 1;
-                    var z = x.Substring(index, end);
-                }
-            }
+            //    if (x.Contains(mapFromT))
+            //    {
+            //        var q = (value.Body as MethodCallExpression).Arguments[0];
+            //        var w = (q as UnaryExpression).Operand;//just check return type
+            //        CheckExpressionByNodeType(w);
+            //        var index = x.IndexOf(mapFromT) + mapFromT.Length;
+            //        var end = x.Length - index - 1;
+            //        var z = x.Substring(index, end);
+            //    }
+            //}
         }
 
         private void CheckExpressionByNodeType(Expression expression)

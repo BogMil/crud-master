@@ -8,7 +8,7 @@ namespace CrudMaster
 {
     public interface IMapFrom<TSource, TDestination>
     {
-        IMapTo<TSource, TDestination> From(Expression<Func<TSource, dynamic>> fromExpression);
+        IMapTo<TSource, TDestination> From<T>(Expression<Func<TSource, T>> fromExpression);
     }
 
     public interface IMapTo<TSource, TDestination>
@@ -21,7 +21,7 @@ namespace CrudMaster
         Dictionary<Expression<Func<TDestination, dynamic>>,
             Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> GetMappings();
 
-        IMapFrom<TSource, TDestination> ToConfigurable();
+        IMapTo<TSource, TDestination> ToConfigurable();
     }
 
     internal static class MapCreatorFactory<TSource, TDestination>
@@ -34,37 +34,19 @@ namespace CrudMaster
             = new Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>>();
         public Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> GetMappings() => _entityToQueryDto;
         protected Map<TSource, TDestination> Map = new Map<TSource, TDestination>();
-        public IMapFrom<TSource, TDestination> ToConfigurable() => this;
+        public IMapTo<TSource, TDestination> ToConfigurable() => this;
 
-        public IMapTo<TSource, TDestination> From(Expression<Func<TSource, dynamic>> sourceExpression)
+        public IMapTo<TSource, TDestination> From<T>(Expression<Func<TSource, T>> sourceExpression)
         {
-            
-            var methodInfo = typeof(IMemberConfigurationExpression<TDestination,TSource,dynamic>).GetMethod("MapFrom").MakeGenericMethod(sourceExpression);
-            var actionT = typeof(Action<>).MakeGenericType(type);
-            return Delegate.CreateDelegate(actionT, methodInfo);
-
             Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>> fromExpression = x => x.MapFrom(sourceExpression);
             Map.From = fromExpression;
+            AddMapToDictionary();
             return this;
-        }
-
-        public static LambdaExpression StripConvert<T>(Expression<Func<T, dynamic>> source)
-        {
-            Expression result = source.Body;
-            // use a loop in case there are nested Convert expressions for some crazy reason
-            while (((result.NodeType == ExpressionType.Convert)
-                    || (result.NodeType == ExpressionType.ConvertChecked))
-                   && (result.Type == typeof(object)))
-            {
-                result = ((UnaryExpression)result).Operand;
-            }
-            return Expression.Lambda(result, source.Parameters);
         }
 
         public IMapFrom<TSource, TDestination> To(Expression<Func<TDestination, dynamic>> to)
         {
             Map.To = to;
-            AddMapToDictionary();
             return this;
         }
 

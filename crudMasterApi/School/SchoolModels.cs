@@ -34,23 +34,16 @@ namespace CrudMasterApi.School
     public class SchoolCommandDto : SchoolBase { }
     public class SchoolMappingProfile : CrudMasterMappingProfile<SchoolQueryDto, SchoolCommandDto, Entities.School>
     {
-        public override void PopulateMps(
-            Dictionary<Expression<Func<SchoolQueryDto, dynamic>>, Expression<
-                Action<IMemberConfigurationExpression<Entities.School, SchoolQueryDto, dynamic>>>> entityToQueryDto)
+        public override void MapToQueryDtoFromEntity(IMapTo<Entities.School, SchoolQueryDto> map)
         {
-            entityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
-            entityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name + "ski"));
-            entityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
+            map.To(s => s.DtoCityId).From(s => s.CityId)
+                .To(s => s.CityName).From(s => s.City.Name + "ski")
+                .To(s => s.RegionName).From(s => s.City.Region.Name);
         }
 
-        public override void ConfigureEntityToQueryDtoMap(IMapFrom<Entities.School, SchoolQueryDto> map)
+        public override void MapToEntityFromCommandDto(IMapTo<SchoolCommandDto,Entities.School> map)
         {
-            map
-                .From(s => s.CityId).To(s => s.DtoCityId)
-                .From(s => s.City.Name+"ski").To(s => s.CityName)
-                .From(s => s.City.Region.Name).To(s => s.RegionName);
-
-            CommandDtoToEntity.Add(d => d.CityId, o => o.MapFrom(s => s.DtoCityId));
+            map.To(s => s.CityId).From(s => s.DtoCityId);
         }
     }
 
