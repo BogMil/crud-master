@@ -48,23 +48,21 @@ namespace CrudMaster
                 Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>>();
 
         public Dictionary<Expression<Func<TEntity, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity,  dynamic>>>> CommandDtoToEntity =
+            Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity, dynamic>>>> CommandDtoToEntity =
             new Dictionary<Expression<Func<TEntity, dynamic>>,
                 Expression<Action<IMemberConfigurationExpression<TCommandDto, TEntity, dynamic>>>>();
 
+
         protected CrudMasterMappingProfile()
         {
-            
-            PopulateMps(_entityToQueryDto);
+
+
+            //PopulateMps(_entityToQueryDto);
             ValidateMapsFromEntityToQueryDto();
 
-            var entityToQueryDtoMap = CreateMap<TEntity, TQueryDto>();
-            foreach (var (key, value) in _entityToQueryDto)
-            {
-                entityToQueryDtoMap.ForMember(key, value.Compile());
-            }
+            CreateMappingFromEntityToQueryDto();
 
-            var commandDtoToEntityMap = CreateMap<TCommandDto,TEntity>();
+            var commandDtoToEntityMap = CreateMap<TCommandDto, TEntity>();
             IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(commandDtoToEntityMap);
             foreach (var (key, value) in CommandDtoToEntity)
             {
@@ -75,11 +73,23 @@ namespace CrudMaster
                 .ConvertUsing<PagedListConverter<TEntity, TQueryDto>>();
         }
 
-        private void IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(IMappingExpression<TCommandDto,TEntity> mapping)
+        private void CreateMappingFromEntityToQueryDto()
         {
-            var propertiesOfEntity=typeof(TEntity).GetProperties().ToList();
+            var entityToQueryDtoMapper = MapCreatorFactory<TEntity, TQueryDto>.Create();
+            ConfigureEntityToQueryDtoMap(entityToQueryDtoMapper.ToConfigurable());
+
+            var entityToQueryDtoMap = CreateMap<TEntity, TQueryDto>();
+            foreach (var (key, value) in _entityToQueryDto)
+            {
+                entityToQueryDtoMap.ForMember(key, value.Compile());
+            }
+        }
+
+        private void IgnoreReferenceTypesWhenMappingFromCommandDtoToEntity(IMappingExpression<TCommandDto, TEntity> mapping)
+        {
+            var propertiesOfEntity = typeof(TEntity).GetProperties().ToList();
             var propertiesToIgnore = propertiesOfEntity.GetPropertiesThatAreNotBaseTypes();
-            
+
             propertiesToIgnore.ForEach(property =>
             {
                 var expressionCreator = new LambdaExpressionCreator<TEntity>(property.Name);
@@ -88,9 +98,9 @@ namespace CrudMaster
         }
 
         public abstract void PopulateMps(Dictionary<Expression<Func<TQueryDto, dynamic>>,
-            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> entityToQueryDto );
+            Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> entityToQueryDto);
 
-        //public abstract Dictionary<Expression<Func<TQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<TEntity, TQueryDto, dynamic>>>> FromEntityToQueryDto();
+        public abstract void ConfigureEntityToQueryDtoMap(IMapFrom<TEntity, TQueryDto> map);
 
         public void ValidateMapsFromEntityToQueryDto()
         {
@@ -118,10 +128,10 @@ namespace CrudMaster
             switch (body.NodeType)
             {
                 case ExpressionType.Call:
-                    var parameters=(body as MethodCallExpression).Method.GetParameters();
+                    var parameters = (body as MethodCallExpression).Method.GetParameters();
                     foreach (var parameterInfo in parameters)
                     {
-                        if(!IsBaseType(parameterInfo.ParameterType))
+                        if (!IsBaseType(parameterInfo.ParameterType))
                             throw new Exception("Do not make calls");
                     }
                     break;
@@ -138,7 +148,7 @@ namespace CrudMaster
 
         private bool IsBaseType(Type parameterInfoParameterType)
         {
-            List<Type> BaseTypes= new List<Type>()
+            List<Type> BaseTypes = new List<Type>()
             {
                 typeof(string),
                 typeof(int),

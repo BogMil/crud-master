@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMasterApi", "crudMaster
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CrudMaster", "CrudMaster\CrudMaster.csproj", "{A65ACCC7-317F-45A5-955B-DDFDE8D54E63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionBuilder", "ExpressionBuilder\ExpressionBuilder.csproj", "{60F6443B-16EC-4C42-870B-F9D33B3AD45D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionBuilder", "ExpressionBuilder\ExpressionBuilder.csproj", "{60F6443B-16EC-4C42-870B-F9D33B3AD45D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudMaster.lib", "CrudMaster.lib", "{EE3622A6-A414-4FDF-8C67-DF366BA41003}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +32,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A65ACCC7-317F-45A5-955B-DDFDE8D54E63} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
+		{60F6443B-16EC-4C42-870B-F9D33B3AD45D} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9A5C8BBC-86B0-46A3-A292-F9E26900EA24}
