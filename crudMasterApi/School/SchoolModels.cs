@@ -41,8 +41,6 @@ namespace CrudMasterApi.School
             entityToQueryDto.Add(d => d.DtoCityId, o => o.MapFrom(s => s.CityId));
             entityToQueryDto.Add(d => d.CityName, o => o.MapFrom(s => s.City.Name + "ski"));
             entityToQueryDto.Add(d => d.RegionName, o => o.MapFrom(s => s.City.Region.Name));
-
-            
         }
 
         public override void ConfigureEntityToQueryDtoMap(IMapFrom<Entities.School, SchoolQueryDto> map)

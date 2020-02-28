@@ -8,7 +8,7 @@ namespace CrudMaster
 {
     public interface IMapFrom<TSource, TDestination>
     {
-        IMapTo<TSource, TDestination> From<TType>(Expression<Func<TSource, TType>> fromExpression);
+        IMapTo<TSource, TDestination> From(Expression<Func<TSource, dynamic>> fromExpression);
     }
 
     public interface IMapTo<TSource, TDestination>
@@ -28,20 +28,22 @@ namespace CrudMaster
     {
         public static IMapCreator<TSource, TDestination> Create() => new MapCreator<TSource, TDestination>();
     }
-    public class MapCreator<TSource, TDestination> : IMapFrom<TSource, TDestination>, IMapTo<TSource, TDestination>, IMapCreator<TSource,TDestination>
+    public class MapCreator<TSource, TDestination> : IMapFrom<TSource, TDestination>, IMapTo<TSource, TDestination>, IMapCreator<TSource, TDestination>
     {
         private readonly Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> _entityToQueryDto
             = new Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>>();
-        public Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> GetMappings()=>_entityToQueryDto;
+        public Dictionary<Expression<Func<TDestination, dynamic>>, Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>>> GetMappings() => _entityToQueryDto;
         protected Map<TSource, TDestination> Map = new Map<TSource, TDestination>();
-        public IMapFrom<TSource, TDestination> ToConfigurable()=>this;
+        public IMapFrom<TSource, TDestination> ToConfigurable() => this;
 
-
-        public IMapTo<TSource, TDestination> From<TType>(Expression<Func<TSource, TType>> sourceExpression)
+        public IMapTo<TSource, TDestination> From(Expression<Func<TSource, dynamic>> sourceExpression)
         {
-            //var z = StripConvert(sourceExpression);
-            Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>> fromExpression = x =>
-                x.MapFrom(sourceExpression);
+            
+            var methodInfo = typeof(IMemberConfigurationExpression<TDestination,TSource,dynamic>).GetMethod("MapFrom").MakeGenericMethod(sourceExpression);
+            var actionT = typeof(Action<>).MakeGenericType(type);
+            return Delegate.CreateDelegate(actionT, methodInfo);
+
+            Expression<Action<IMemberConfigurationExpression<TSource, TDestination, dynamic>>> fromExpression = x => x.MapFrom(sourceExpression);
             Map.From = fromExpression;
             return this;
         }
@@ -72,7 +74,7 @@ namespace CrudMaster
             Map = new Map<TSource, TDestination>();
         }
 
-        
+
     }
 
     public class Map<TSource, TDestination>
