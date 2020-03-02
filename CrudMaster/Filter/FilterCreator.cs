@@ -21,13 +21,14 @@ namespace CrudMaster.Filter
     }
     public class FilterCreator<TEntity, TQueryDto> where TEntity : class where TQueryDto : class
     {
-        private FilterObject FilterObject { get; set; }
+        private FilterObject FilterObject { get; set; }=new FilterObject();
         private readonly ParameterExpression _parameterExpression = Expression.Parameter(typeof(TEntity), "s");
         private readonly IExpressionBuilder _expressionBuilder;
 
         public FilterCreator(string filters)
         {
-            FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
+            if(!String.IsNullOrEmpty(filters))
+                FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
             _expressionBuilder = new ExprBuilder();
         }
 
