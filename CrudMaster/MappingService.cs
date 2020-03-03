@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using AutoMapper;
 using X.PagedList;
@@ -18,6 +19,7 @@ namespace CrudMaster
 
         string GetFkNameInSourceForDestinationFkName(string destinationFkName, Type destinationType, Type sourceType);
         StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source);
+        List<string> GetIncludings(Type sourceType, Type destinationType);
 
     }
 
@@ -33,6 +35,19 @@ namespace CrudMaster
         public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source)
         {
             return Mapper.Map<IPagedList <TSource>,StaticPagedList<TDestination>>((PagedList<TSource>)source);
+        }
+
+        public List<string> GetIncludings(Type sourceType, Type destinationType)
+        {
+            var mapping = Mapper.GetTypeMapFor(sourceType, destinationType);
+            foreach (var propertyMap in mapping.PropertyMaps)
+            {
+                var parameterName = propertyMap.CustomMapExpression.Parameters[0].Name;
+                var returnType = propertyMap.CustomMapExpression.ReturnType;
+                var str = propertyMap.CustomMapExpression.ToString();
+            }
+
+            return null;
         }
 
         public TypeMap GetTypeMapFor(Type sourceType, Type destinationType)

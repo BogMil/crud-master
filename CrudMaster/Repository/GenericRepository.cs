@@ -10,6 +10,23 @@ using X.PagedList;
 
 namespace CrudMaster.Repository
 {
+    public interface IGenericRepository<TEntity> where TEntity : class
+    {
+        IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties, List<string> includings);
+        TEntity Find(int id);
+        void Create(TEntity entity);
+        TEntity CreateAndReturn(TEntity entity);
+        void Update(TEntity entity);
+        TEntity UpdateAndReturn(TEntity entity);
+        void Delete(int id);
+        int DeleteAndReturn(int id);
+        Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
+        TEntity NewDbSet();
+        Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template);
+        Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName);
+
+    }
+
     public abstract class GenericRepository<TEntity, TContext> :
 
         IGenericRepository<TEntity>
@@ -103,7 +120,7 @@ namespace CrudMaster.Repository
             Db.SaveChanges();
         }
 
-        public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties)
+        public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties,List<string> includings)
         {
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
 

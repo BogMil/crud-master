@@ -28,10 +28,14 @@ namespace CrudMaster.Service
         {
             var wherePredicate = FilterFactory.Create<TEntity, TQueryDto>(filters);
             var orderBy = new GenericOrderByPredicateCreator<TEntity, TQueryDto>().GetPropertyObject(orderByProperties);
-            var entities = Repository.Filter(pager, wherePredicate, orderBy);
+
+            var mappings = MappingService.GetIncludings(typeof(TEntity), typeof(TQueryDto));
+            
+            var entities = Repository.Filter(pager, wherePredicate, orderBy,null);
 
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
+
 
         public Dictionary<string, string> OptionsForForeignKey(string dtoFkName, string templateWithColumnNames, string concatenator)
         {
