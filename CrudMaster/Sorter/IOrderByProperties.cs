@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection;
-
-namespace CrudMaster.Sorter
+﻿namespace CrudMaster.Sorter
 
 {
     public interface IOrderByProperties

@@ -7,8 +7,6 @@ using CrudMaster.Service;
 using CrudMasterApi.Entities;
 using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore.Infrastructure;
-
 namespace CrudMasterApi.School
 {
     public interface ISchoolService : IGenericService<SchoolQueryDto, SchoolCommandDto>

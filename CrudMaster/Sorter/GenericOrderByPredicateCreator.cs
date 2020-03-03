@@ -1,10 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
-using System.Reflection;
-using CrudMaster.Extensions;
-using CrudMaster.PropertyMapper;
-
-namespace CrudMaster.Sorter
+﻿namespace CrudMaster.Sorter
 
 {
     public class GenericOrderByPredicateCreator<TEntity, TQueryDto> :

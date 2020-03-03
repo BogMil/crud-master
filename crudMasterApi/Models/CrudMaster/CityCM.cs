@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using AutoMapper;
-using CrudMaster;
-using CrudMasterApi.Entities;
-
 namespace CrudMasterApi.Models.CrudMaster
 {
     public class CityBase

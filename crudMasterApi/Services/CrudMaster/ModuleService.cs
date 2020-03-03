@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CrudMaster.Service;
+﻿using CrudMaster.Service;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;
 using CrudMasterApi.Repositories;

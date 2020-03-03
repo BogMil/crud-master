@@ -37,11 +37,11 @@ namespace CrudMaster
             var expressionsFuncReturnType = EntityType;
             Expression expr = ExpressionInputParameter;
 
-            foreach (string prop in splitProperyPath)
+            foreach (var prop in splitProperyPath)
             {
-                PropertyInfo pi = expressionsFuncReturnType.GetProperty(prop);
+                var pi = expressionsFuncReturnType.GetProperty(prop);
                 if (pi == null)
-                    throw new MissingFieldException($"Type '{EntityType}' does not have property '{prop}'");
+                    throw new MissingFieldException($"'{EntityType}' does not have property '{prop}'. Check mappings!");
                 expr = Expression.Property(expr, pi);
                 expressionsFuncReturnType = pi.PropertyType;
             }

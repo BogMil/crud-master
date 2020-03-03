@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExpressionBuilder.ExpressionCombiners
+﻿namespace ExpressionBuilder.ExpressionCombiners
 {
     internal static class ExpressionCombiner
     {

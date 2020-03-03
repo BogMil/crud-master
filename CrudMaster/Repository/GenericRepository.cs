@@ -106,6 +106,7 @@ namespace CrudMaster.Repository
         public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties)
         {
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
+
             listOfEntities = listOfEntities.Include("City.Region");
 
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);

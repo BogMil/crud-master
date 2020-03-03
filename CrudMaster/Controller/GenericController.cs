@@ -5,7 +5,6 @@ using CrudMaster.Service;
 using CrudMaster.Sorter;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using X.PagedList;
 
 namespace CrudMaster.Controller
 {

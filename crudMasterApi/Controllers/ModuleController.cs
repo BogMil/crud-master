@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CrudMaster.Controller;
+﻿using CrudMaster.Controller;
 using CrudMasterApi.Models.CrudMaster;
 using CrudMasterApi.Services.CrudMaster;
 using Microsoft.AspNetCore.Mvc;

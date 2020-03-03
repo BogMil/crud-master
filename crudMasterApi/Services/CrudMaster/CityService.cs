@@ -1,4 +1,3 @@
-using AutoMapper;
 using CrudMaster.Service;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using AutoMapper;
 using CrudMaster;
-using CrudMasterApi.Models.CrudMaster;
 
 namespace CrudMasterApi.School
 {
@@ -32,13 +28,14 @@ namespace CrudMasterApi.School
     }
 
     public class SchoolCommandDto : SchoolBase { }
+
     public class SchoolMappingProfile : CrudMasterMappingProfile<SchoolQueryDto, SchoolCommandDto, Entities.School>
     {
         public override void MapToQueryDtoFromEntity(IMapTo<Entities.School, SchoolQueryDto> map)
         {
             map.To(s => s.DtoCityId).From(s => s.CityId)
                 .To(s => s.CityName).From(s => s.City.Name + "ski")
-                .To(s => s.RegionName).From(s => s.City.Region.Name);
+                .To(s => s.RegionName).From(s => s.City.Region.Name); 
         }
 
         public override void MapToEntityFromCommandDto(IMapTo<SchoolCommandDto,Entities.School> map)
@@ -46,6 +43,4 @@ namespace CrudMasterApi.School
             map.To(s => s.CityId).From(s => s.DtoCityId);
         }
     }
-
-   
 }

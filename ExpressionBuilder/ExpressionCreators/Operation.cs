@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExpressionBuilder.ExpressionCreators
+﻿namespace ExpressionBuilder.ExpressionCreators
 {
     class Operation
     {

@@ -1,6 +1,4 @@
-using CrudMaster;
 using CrudMaster.Controller;
-using CrudMaster.Sorter;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CrudMasterApi.School

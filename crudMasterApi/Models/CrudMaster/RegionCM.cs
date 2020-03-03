@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using AutoMapper;
-using CrudMaster;
-using CrudMaster.Filter;
-using CrudMaster.PropertyMapper;
-using CrudMaster.Sorter;
-using CrudMasterApi.Entities;
-using X.PagedList;
-
-namespace CrudMasterApi.Models.CrudMaster
+﻿namespace CrudMasterApi.Models.CrudMaster
 {
     public class RegionBase
     {

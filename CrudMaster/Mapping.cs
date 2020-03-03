@@ -2,17 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using AutoMapper;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using CrudMaster.Extensions;
-using CrudMaster.Service;
-using Microsoft.VisualBasic.CompilerServices;
-using Microsoft.VisualBasic.FileIO;
 using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
-using NewArrayExpression = Castle.DynamicProxy.Generators.Emitters.SimpleAST.NewArrayExpression;
 
 namespace CrudMaster
 {
@@ -46,8 +39,7 @@ namespace CrudMaster
         protected CrudMasterMappingProfile()
         {
             ValidateMapsFromEntityToQueryDto();
-
-            CreateMappingFromEntityToQueryDto();
+            CreateMappingToQueryDtoFromEntity();
 
             CreateMappingToEntityFromCommandDto();
 
@@ -68,7 +60,7 @@ namespace CrudMaster
             }
         }
 
-        private void CreateMappingFromEntityToQueryDto()
+        private void CreateMappingToQueryDtoFromEntity()
         {
             var entityToQueryDtoMapper = MapCreatorFactory<TEntity, TQueryDto>.Create();
             MapToQueryDtoFromEntity(entityToQueryDtoMapper.ToConfigurable());
