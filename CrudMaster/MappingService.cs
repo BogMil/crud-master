@@ -25,26 +25,30 @@ namespace CrudMaster
 
     public class MappingService : IMappingService
     {
-        public IMapper Mapper { get; set; }= Mapping.Mapper;
+        public IMapper Mapper { get; set; } = Mapping.Mapper;
 
-        public TDestination Map<TSource,TDestination>(TSource source)
+        public TDestination Map<TSource, TDestination>(TSource source)
         {
             return Mapper.Map<TSource, TDestination>(source);
         }
 
         public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source)
         {
-            return Mapper.Map<IPagedList <TSource>,StaticPagedList<TDestination>>((PagedList<TSource>)source);
+            return Mapper.Map<IPagedList<TSource>, StaticPagedList<TDestination>>((PagedList<TSource>)source);
         }
 
         public List<string> GetIncludings(Type sourceType, Type destinationType)
         {
             var mapping = Mapper.GetTypeMapFor(sourceType, destinationType);
+            var list = new List<string>();
             foreach (var propertyMap in mapping.PropertyMaps)
             {
+                if (propertyMap.CustomMapExpression == null) continue;
+
                 var parameterName = propertyMap.CustomMapExpression.Parameters[0].Name;
                 var returnType = propertyMap.CustomMapExpression.ReturnType;
                 var str = propertyMap.CustomMapExpression.ToString();
+                list.Add(str);
             }
 
             return null;
@@ -59,7 +63,7 @@ namespace CrudMaster
         public LambdaExpression GetPropertyMappingExpression(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
-           
+
             var propertyMap = typeMap.GetPropertyMapByDestinationPropertyName(destinationPropertyName);
             if (propertyMap.CustomMapExpression != null)
                 return propertyMap.CustomMapExpression;
