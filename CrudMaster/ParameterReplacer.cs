@@ -10,7 +10,7 @@ namespace CrudMaster
         }
     }
 
-    class ReplaceVisitor : ExpressionVisitor
+    public class ReplaceVisitor : ExpressionVisitor
     {
         private ParameterExpression _parameter;
 

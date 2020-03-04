@@ -79,7 +79,7 @@ namespace CrudMaster
 
             propertiesToIgnore.ForEach(property =>
             {
-                var expressionCreator = new LambdaExpressionCreator<TEntity>(property.Name);
+                var expressionCreator = new LambdaExpressionFromPath<TEntity>(property.Name);
                 mapping.ForMember(expressionCreator.FullPropertyPath, o => o.Ignore());
             });
         }

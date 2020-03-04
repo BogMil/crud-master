@@ -1,61 +1,59 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using CrudMaster.Utils;
 
 namespace CrudMaster
 {
-    public class LambdaExpressionCreator<TEntity>
+    public class LambdaExpressionFromPath<TSource>
     {
-        public readonly Type EntityType = typeof(TEntity);
-        public readonly Type ExpressionsFuncReturnType;
+        public readonly Type ExpressionFuncReturnType;
         //do not change name
         public readonly LambdaExpression LambdaExpression;
-        public readonly ParameterExpression ExpressionInputParameter;
+        public readonly ParameterExpression ParameterExpression;
         public readonly Expression Expression;
-        public readonly Type DelegateType;
         public readonly string FullPropertyPath;
         /// <summary>
         /// Without parameter
         /// </summary>
         /// <param name="fullPropertyPath"></param>
 
-        public LambdaExpressionCreator(string fullPropertyPath)
+        public LambdaExpressionFromPath(string fullPropertyPath)
         {
             FullPropertyPath = fullPropertyPath;
-            ExpressionInputParameter = Expression.Parameter(EntityType, "x");
-
+            ParameterExpression = Expression.Parameter(typeof(TSource), Constants.PARAMETER_EXPRESSION_NAME);
             var expressionBuiltFromString = CreateExpressionBuiltFromString();
-            ExpressionsFuncReturnType = expressionBuiltFromString.ExpressionsFuncReturnType;
+            ExpressionFuncReturnType = expressionBuiltFromString.ExpressionsFuncReturnType;
             Expression = expressionBuiltFromString.Expression;
-            DelegateType = typeof(Func<,>).MakeGenericType(EntityType, ExpressionsFuncReturnType);
             LambdaExpression = CreateLambdaExpression();
         }
 
         private ExpressionBuiltFromString CreateExpressionBuiltFromString()
         {
-            string[] splitProperyPath = FullPropertyPath.Split('.');
-            var expressionsFuncReturnType = EntityType;
-            Expression expr = ExpressionInputParameter;
+            var splitProperyPath = FullPropertyPath.Split('.');
+            var expressionFuncReturnType = typeof(TSource);
+            Expression expr = ParameterExpression;
 
             foreach (var prop in splitProperyPath)
             {
-                var pi = expressionsFuncReturnType.GetProperty(prop);
-                if (pi == null)
-                    throw new MissingFieldException($"'{EntityType}' does not have property '{prop}'. Check mappings!");
-                expr = Expression.Property(expr, pi);
-                expressionsFuncReturnType = pi.PropertyType;
+                var property = expressionFuncReturnType.GetProperty(prop);
+                if (property == null)
+                    throw new MissingFieldException($"'{typeof(TSource)}' does not have property '{prop}'. Check mappings!");
+                expr = Expression.Property(expr, property);
+                expressionFuncReturnType = property.PropertyType;
             }
 
             return new ExpressionBuiltFromString()
             {
                 Expression = expr,
-                ExpressionsFuncReturnType = expressionsFuncReturnType
+                ExpressionsFuncReturnType = expressionFuncReturnType
             };
         }
 
         private LambdaExpression CreateLambdaExpression()
         {
-            return Expression.Lambda(DelegateType, Expression, ExpressionInputParameter);
+            var delegateType = typeof(Func<,>).MakeGenericType(typeof(TSource), ExpressionFuncReturnType);
+            return Expression.Lambda(delegateType, Expression, ParameterExpression);
         }
 
         private class ExpressionBuiltFromString

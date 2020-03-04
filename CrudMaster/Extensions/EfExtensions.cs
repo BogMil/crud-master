@@ -37,7 +37,7 @@ namespace CrudMaster.Extensions
         string fullPropertyPath,
         string methodName)
         {
-            var lambdaExpressionCreator = new LambdaExpressionCreator<TEntity>(fullPropertyPath);
+            var lambdaExpressionCreator = new LambdaExpressionFromPath<TEntity>(fullPropertyPath);
             var x = lambdaExpressionCreator.LambdaExpression;
             x = null;
 
@@ -46,7 +46,7 @@ namespace CrudMaster.Extensions
                             && method.IsGenericMethodDefinition
                             && method.GetGenericArguments().Length == 2
                             && method.GetParameters().Length == 2)
-                    .MakeGenericMethod(lambdaExpressionCreator.EntityType, lambdaExpressionCreator.ExpressionsFuncReturnType)
+                    .MakeGenericMethod(typeof(TEntity), lambdaExpressionCreator.ExpressionFuncReturnType)
                     .Invoke(null, new object[] { source, lambdaExpressionCreator.LambdaExpression });
 
             return (IOrderedQueryable<TEntity>)result;

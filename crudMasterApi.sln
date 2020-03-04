@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExpressionBuilder", "Expres
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrudMaster.lib", "CrudMaster.lib", "{EE3622A6-A414-4FDF-8C67-DF366BA41003}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudMaster.Utils", "CrudMaster.Utils\CrudMaster.Utils.csproj", "{68223555-F5E5-4E46-B528-7D6AD21D1437}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrudMaster.UnitTests", "CrudMaster.UnitTests\CrudMaster.UnitTests.csproj", "{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +33,14 @@ Global
 		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60F6443B-16EC-4C42-870B-F9D33B3AD45D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68223555-F5E5-4E46-B528-7D6AD21D1437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68223555-F5E5-4E46-B528-7D6AD21D1437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68223555-F5E5-4E46-B528-7D6AD21D1437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68223555-F5E5-4E46-B528-7D6AD21D1437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +48,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A65ACCC7-317F-45A5-955B-DDFDE8D54E63} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
 		{60F6443B-16EC-4C42-870B-F9D33B3AD45D} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
+		{68223555-F5E5-4E46-B528-7D6AD21D1437} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
+		{4D0BFA64-0BEA-4440-88BA-AC7C9484D86A} = {EE3622A6-A414-4FDF-8C67-DF366BA41003}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9A5C8BBC-86B0-46A3-A292-F9E26900EA24}

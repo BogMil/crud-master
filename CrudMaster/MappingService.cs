@@ -48,6 +48,7 @@ namespace CrudMaster
                 var parameterName = propertyMap.CustomMapExpression.Parameters[0].Name;
                 var returnType = propertyMap.CustomMapExpression.ReturnType;
                 var str = propertyMap.CustomMapExpression.ToString();
+                var expString = new ExpressionString(str);
                 list.Add(str);
             }
 
@@ -68,13 +69,13 @@ namespace CrudMaster
             if (propertyMap.CustomMapExpression != null)
                 return propertyMap.CustomMapExpression;
 
-            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionCreator<>).MakeGenericType(sourceType);
+            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionFromPath<>).MakeGenericType(sourceType);
             dynamic linkedTableExpressionCreator =
                 Activator.CreateInstance(sourceTypeLambdaExpressionCreatorType, destinationPropertyName);
             return linkedTableExpressionCreator.LambdaExpression;
         }
 
-        public LambdaExpressionCreator<dynamic> GetExpressionCreatorForMappingFromDestinationPropToSourceProp(string destinationPropertyName, Type destinationType, Type sourceType)
+        public LambdaExpressionFromPath<dynamic> GetExpressionCreatorForMappingFromDestinationPropToSourceProp(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             //var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
 
@@ -82,7 +83,7 @@ namespace CrudMaster
             //if (propertyMap.CustomMapExpression != null)
             //    return propertyMap.CustomMapExpression;
 
-            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionCreator<>).MakeGenericType(destinationType);
+            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionFromPath<>).MakeGenericType(destinationType);
             dynamic linkedTableExpressionCreator =
                 Activator.CreateInstance(sourceTypeLambdaExpressionCreatorType, destinationPropertyName);
             return linkedTableExpressionCreator;

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CrudMaster.Utils\CrudMaster.Utils.csproj" />
     <ProjectReference Include="..\ExpressionBuilder\ExpressionBuilder.csproj" />
   </ItemGroup>
 

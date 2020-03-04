@@ -35,7 +35,7 @@ namespace CrudMasterApi.School
         {
             
             map.To(s => s.DtoCityId).From(s => s.CityId)
-                .To(s => s.CityName).From(s => s.City.Name + "ski")
+                .To(s => s.CityName).From(s => s.City.Name + "ski" + s.City.Name + "ski")
                 .To(s => s.RegionName).From(s => s.City.Region.Name); 
         }
 
