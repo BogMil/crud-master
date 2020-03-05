@@ -1,4 +1,5 @@
 using System;
+using System.Linq.Expressions;
 using CrudMaster.Utils;
 using Xunit;
 
@@ -39,6 +40,38 @@ namespace CrudMaster.UnitTests
         {
             var expressionFromPath = new LambdaExpressionFromPath<TestClass>(propertyPath);
             Assert.Equal(propertyType, expressionFromPath.ExpressionFuncReturnType);
+        }
+
+        [Theory]
+        [InlineData("Int")]
+        [InlineData("String")]
+        [InlineData("NestedTestClass.Int")]
+        public void LambdaExpression_isAsExpected(string propertyPath)
+        {
+            var expressionFromPath = new LambdaExpressionFromPath<TestClass>(propertyPath).LambdaExpression.Body.ToString();
+            var expected = Constants.PARAMETER_EXPRESSION_NAME + "." + propertyPath;
+            Assert.Equal(expected, expressionFromPath);
+        }
+
+        [Theory]
+        [InlineData("Int")]
+        [InlineData("String")]
+        [InlineData("NestedTestClass.Int")]
+        public void ParameterExpression_isAsExpected(string propertyPath)
+        {
+            var actual  = new LambdaExpressionFromPath<TestClass>(propertyPath).ParameterExpression;
+            var expected=Expression.Parameter(typeof(NestedTestClass), Constants.PARAMETER_EXPRESSION_NAME);
+            Assert.Equal(expected.NodeType, actual.NodeType);
+            Assert.Equal(expected.ToString(), actual.ToString());
+        }
+        [Theory]
+        [InlineData("Int")]
+        [InlineData("String")]
+        [InlineData("NestedTestClass.Int")]
+        public void FullPropertyPath_isAsProvided(string propertyPath)
+        {
+            var actual = new LambdaExpressionFromPath<TestClass>(propertyPath);
+            Assert.Equal(propertyPath, actual.FullPropertyPath);
         }
     }
 }
