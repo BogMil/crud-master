@@ -12,7 +12,7 @@ namespace CrudMaster.Repository
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {
-        IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties, List<string> includings);
+        IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties, IEnumerable<string> includings);
         TEntity Find(int id);
         void Create(TEntity entity);
         TEntity CreateAndReturn(TEntity entity);
@@ -56,11 +56,12 @@ namespace CrudMaster.Repository
             Db.SaveChanges();
         }
 
-        public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties,List<string> includings)
+        public virtual IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters,
+            IOrderByProperties orderByProperties, IEnumerable<string> includings)
         {
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
 
-            listOfEntities = listOfEntities.Include("City.Region");
+            listOfEntities = includings.Aggregate(listOfEntities, (current, including) => current.Include(including));
 
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
             listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);

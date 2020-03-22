@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using AutoMapper;
+using CrudMaster;
+using CrudMasterApi.Entities;
+
 namespace CrudMasterApi.Models.CrudMaster
 {
     public class CityBase
@@ -10,7 +17,7 @@ namespace CrudMasterApi.Models.CrudMaster
 
     public class CityQueryDto : CityBase
     {
-        public RegionQueryDto Region { get; set; }
+        //public RegionQueryDto Region { get; set; }
         public string RegionName { get; set; }
     }
 
@@ -34,20 +41,16 @@ namespace CrudMasterApi.Models.CrudMaster
     //    }
     //}
 
-    //public class CityMappingProfile : CrudMasterMappingProfile<CityQueryDto, CityCommandDto, City>
-    //{
-    //    public override void PopulateMps(Dictionary<Expression<Func<CityQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<City, CityQueryDto, dynamic>>>> entityToQueryDto)
-    //    {
-    //        entityToQueryDto.Add(x => x.RegionName, o => o.MapFrom(s => s.Region.Name));
+    public class CityMappingProfile : CrudMasterMappingProfile<CityQueryDto, CityCommandDto, City>
+    {
 
-    //        CommandDtoToEntity.Add(s => s.Region, o => o.Ignore());
-    //        CommandDtoToEntity.Add(s => s.Schools, o => o.Ignore());
-    //    }
+        public override void MapToQueryDtoFromEntity(IMapTo<City, CityQueryDto> map)
+        {
+            map.To(d => d.RegionName).From(s => s.Region.Name);
+        }
 
-    //    public override void ConfigureEntityToQueryDtoMap(IMapFrom<City, CityQueryDto> map)
-    //    {
-            
-    //    }
-    //}
+        public override void MapToEntityFromCommandDto(IMapTo<CityCommandDto, City> map)
+        { }
+    }
 }
 

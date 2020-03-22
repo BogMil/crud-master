@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
+using CrudMaster.Extensions;
 using X.PagedList;
 
 namespace CrudMaster
@@ -19,46 +21,35 @@ namespace CrudMaster
 
         string GetFkNameInSourceForDestinationFkName(string destinationFkName, Type destinationType, Type sourceType);
         StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source);
-        List<string> GetIncludings(Type sourceType, Type destinationType);
+        IEnumerable<string> GetIncludings(Type sourceType, Type destinationType);
 
     }
 
     public class MappingService : IMappingService
     {
-        public IMapper Mapper { get; set; } = Mapping.Mapper;
+        public IMapper Mapper { get; set; }
+        private readonly IncludingsExtractor _includingsExtractor;
 
-        public TDestination Map<TSource, TDestination>(TSource source)
+        public MappingService()
         {
-            return Mapper.Map<TSource, TDestination>(source);
+            Mapper = Mapping.GetMapper();
+            _includingsExtractor = new IncludingsExtractor();
         }
 
-        public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source)
-        {
-            return Mapper.Map<IPagedList<TSource>, StaticPagedList<TDestination>>((PagedList<TSource>)source);
-        }
+        public TDestination Map<TSource, TDestination>(TSource source) 
+            => Mapper.Map<TSource, TDestination>(source);
 
-        public List<string> GetIncludings(Type sourceType, Type destinationType)
+        public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source) 
+            => Mapper.Map<IPagedList<TSource>, StaticPagedList<TDestination>>((PagedList<TSource>)source);
+
+        public IEnumerable<string> GetIncludings(Type sourceType, Type destinationType)
         {
             var mapping = Mapper.GetTypeMapFor(sourceType, destinationType);
-            var list = new List<string>();
-            foreach (var propertyMap in mapping.PropertyMaps)
-            {
-                if (propertyMap.CustomMapExpression == null) continue;
-
-                var parameterName = propertyMap.CustomMapExpression.Parameters[0].Name;
-                var returnType = propertyMap.CustomMapExpression.ReturnType;
-                var str = propertyMap.CustomMapExpression.ToString();
-                var expString = new ExpressionString(str);
-                list.Add(str);
-            }
-
-            return null;
+            return _includingsExtractor.Extract(mapping);
         }
 
-        public TypeMap GetTypeMapFor(Type sourceType, Type destinationType)
-        {
-            return Mapper.GetTypeMapFor(sourceType, destinationType);
-        }
+        public TypeMap GetTypeMapFor(Type sourceType, Type destinationType) 
+            => Mapper.GetTypeMapFor(sourceType, destinationType);
 
 
         public LambdaExpression GetPropertyMappingExpression(string destinationPropertyName, Type destinationType, Type sourceType)

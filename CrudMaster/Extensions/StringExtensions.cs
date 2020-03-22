@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class StringExtensions
     {

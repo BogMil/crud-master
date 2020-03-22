@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using AutoMapper;
 
-namespace CrudMaster
+namespace CrudMaster.Extensions
 {
     public static class MapperExtensions
     {
@@ -32,38 +31,4 @@ namespace CrudMaster
             return mappings;
         }
     }
-
-    public static class TypeMapExtensions
-    {
-        public static PropertyMap GetPropertyMapByDestinationPropertyName(this TypeMap typeMap, string destinationPropertyNameName)
-        {
-            var propertyMapsForDestionationName= typeMap.PropertyMaps.Where(map => map.DestinationName == destinationPropertyNameName).ToList();
-            if(propertyMapsForDestionationName.Count==0)
-                throw new Exception($"No mapping found for destinationName:{destinationPropertyNameName}");
-            if (propertyMapsForDestionationName.Count > 1)
-                throw new Exception($"Multiple mappings found for destinationName:{destinationPropertyNameName}");
-
-            return propertyMapsForDestionationName.First();
-        }
-    }
-
-    public static class PropertyMapExtensions
-    {
-        public static string GetNameOfForeignKeyInSource(this PropertyMap propertyMap)
-        {
-            if (propertyMap.CustomMapExpression == null)
-                return propertyMap.DestinationName;
-
-            //In case of foreign key. Fot type T foreign key is always T.FK. It can not be something like T.Somethin.FK
-            var expression = propertyMap.CustomMapExpression;
-            var fkName = (expression.Body as MemberExpression)?.Member.Name;
-            if(fkName.Contains("."))
-                throw new Exception("Not foreign key");
-
-            return fkName;
-
-        }
-    }
-
-    
 }

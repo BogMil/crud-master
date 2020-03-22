@@ -29,9 +29,9 @@ namespace CrudMaster.Service
             var wherePredicate = FilterFactory.Create<TEntity, TQueryDto>(filters);
             var orderBy = new GenericOrderByPredicateCreator<TEntity, TQueryDto>().GetPropertyObject(orderByProperties);
 
-            var mappings = MappingService.GetIncludings(typeof(TEntity), typeof(TQueryDto));
+            var includings = MappingService.GetIncludings(typeof(TEntity), typeof(TQueryDto));
             
-            var entities = Repository.Filter(pager, wherePredicate, orderBy,null);
+            var entities = Repository.Filter(pager, wherePredicate, orderBy, includings);
 
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }

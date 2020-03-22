@@ -30,7 +30,7 @@ namespace CrudMaster
             return mapper;
         });
 
-        public static IMapper Mapper => Lazy.Value;
+        public static IMapper GetMapper() => Lazy.Value;
     }
 
     public abstract class CrudMasterMappingProfile<TQueryDto, TCommandDto, TEntity> : Profile where TQueryDto : class where TEntity : class where TCommandDto : class

@@ -10,7 +10,7 @@ namespace CrudMaster
         StaticPagedList<TDestination> ITypeConverter<PagedList<TSource>, StaticPagedList<TDestination>>.
             Convert(PagedList<TSource> source, StaticPagedList<TDestination> destination, ResolutionContext context)
         {
-            var collection = Mapping.Mapper.Map<IEnumerable<TSource>, IEnumerable<TDestination>>(source);
+            var collection = Mapping.GetMapper().Map<IEnumerable<TSource>, IEnumerable<TDestination>>(source);
             return new StaticPagedList<TDestination>(collection, source.PageNumber, source.PageSize, source.TotalItemCount);
         }
     }

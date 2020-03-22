@@ -1,5 +1,6 @@
 ﻿using System;
 using CrudMaster;
+using CrudMasterApi.Models.CrudMaster;
 
 namespace CrudMasterApi.School
 {
@@ -21,7 +22,7 @@ namespace CrudMasterApi.School
 
     public class SchoolQueryDto : SchoolBase
     {
-        //public CityQueryDto City { get; set; }
+        public CityQueryDto City { get; set; }
         public string CityName { get; set; }
         public string RegionName { get; set; }
 
@@ -35,7 +36,7 @@ namespace CrudMasterApi.School
         {
             
             map.To(s => s.DtoCityId).From(s => s.CityId)
-                .To(s => s.CityName).From(s => s.City.Name + "ski" + s.City.Name + "ski")
+                .To(s => s.CityName).From(s => s.City.Name +" " + s.CityId.ToString() + "ski" + s.City.Name + "ski")
                 .To(s => s.RegionName).From(s => s.City.Region.Name); 
         }
 
