@@ -21,7 +21,7 @@ namespace CrudMaster.Service
         int DeleteAndReturn(int id);
         TQueryDto Find(int id);
         StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties);
-        Dictionary<string, string> OptionsForForeignKey(string fkName, string templateWithColumnNames, string concatenator);
+        //Dictionary<string, string> OptionsForForeignKey(string fkName, string templateWithColumnNames, string concatenator);
 
 
     }

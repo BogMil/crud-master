@@ -22,9 +22,6 @@ namespace CrudMaster.Repository
         int DeleteAndReturn(int id);
         Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
         TEntity NewDbSet();
-        Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template);
-        Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName);
-
     }
 
     public abstract class GenericRepository<TEntity, TContext> :
@@ -42,67 +39,6 @@ namespace CrudMaster.Repository
         }
 
         public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
-
-        public Type GetTypeOfLinkedTableByForeignKeyName(Type typeOfEntity, string fkEntityName)
-        {
-            var allFks = Db.Model.FindEntityType(typeOfEntity).GetForeignKeys();
-
-            var foundFk = allFks.Single(s => (s.Properties.Select(d => d.Name)).Contains(fkEntityName));
-            if (foundFk == null)
-                throw new Exception($"{fkEntityName} is not a foreign key of {typeOfEntity.ToString()}");
-
-            var typeOfLinkedTable = foundFk.PrincipalEntityType;
-            var clrType = typeOfLinkedTable.ClrType;
-            return typeOfEntity.Assembly
-                .GetType(clrType.FullName ??
-                         throw new InvalidOperationException("ClrType does not have fullName of linked table Type"));
-        }
-
-        public Dictionary<string, string> OptionsForForeignKey(Type linkedTableType, TemplateWithColumnNames template)
-        { 
-            var tableNamesToInclude = new List<string>();
-            foreach (var exp in template.ExpressionsOfDtoToEntityColNames.Values)
-            {
-                var t = exp.Body.NodeType;
-                if (t == ExpressionType.Call)
-                {
-                    var objectNodeType = (exp.Body as MethodCallExpression).Object.NodeType;
-                }
-                var expString = new ExpressionString(exp.ToString());
-                var x=(exp.Body)as Expression;
-                if (exp.Body.NodeType == ExpressionType.Call)
-                {
-                    var handle= (exp.Body as MethodCallExpression).Method.MethodHandle;
-                    var xc = MethodBase.GetMethodFromHandle(handle);
-                    var a=xc.GetMethodBody();
-                }
-                foreach (var tableName in expString.TableNamesToInclude)
-                {
-                    if(!tableNamesToInclude.Contains(tableName))
-                        tableNamesToInclude.Add(tableName);
-                }
-            }
-            var pkOfLinkedTable = Db.Model.FindEntityType(linkedTableType).FindPrimaryKey().Properties.Select(y => y.Name).Single();
-            //var linkedTableType1 = Db.GetType().Assembly.GetType(linkedTableType.FullName);
-            var dbSetOflinkedTable =
-                (IQueryable<object>)Db.GetType().GetMethod("Set").MakeGenericMethod(linkedTableType).Invoke(Db, null);
-
-            foreach (var tableName in tableNamesToInclude)
-            {
-                dbSetOflinkedTable = dbSetOflinkedTable.Include(tableName);
-            }
-
-            var res=dbSetOflinkedTable
-                //.ToList()
-                .Select(x =>
-                new KeyValuePair<string, string>(
-                    x.GetType().GetProperty(pkOfLinkedTable).GetValue(x).ToString(),
-                    template.Replace(x)
-                )
-            ).ToList();
-
-            return res?.ToDictionary(x => x.Key, x => x.Value);
-        }
 
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);
 

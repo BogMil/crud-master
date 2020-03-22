@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 using CrudMaster.Utils;
 using Xunit;
 
@@ -72,6 +73,13 @@ namespace CrudMaster.UnitTests
         {
             var actual = new LambdaExpressionFromPath<TestClass>(propertyPath);
             Assert.Equal(propertyPath, actual.FullPropertyPath);
+        }
+
+        [Fact]
+        public void HasPropertyLambdaExpression()
+        {
+            var fieldInfo = typeof(LambdaExpressionFromPath<>).GetField("LambdaExpression");
+            Assert.NotNull(fieldInfo);
         }
     }
 }

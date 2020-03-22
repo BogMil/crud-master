@@ -36,40 +36,6 @@ namespace CrudMaster.Service
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
 
-
-        public Dictionary<string, string> OptionsForForeignKey(string dtoFkName, string templateWithColumnNames, string concatenator)
-        {
-            dtoFkName = dtoFkName.ToUpperFirsLetter();
-            var template = new TemplateWithColumnNames(templateWithColumnNames);
-
-            var entityFkName = MappingService.GetFkNameInSourceForDestinationFkName(dtoFkName, typeof(TQueryDto), typeof(TEntity));
-            var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(typeof(TEntity), entityFkName);
-            var queryDtoOfLinkedTable = GetQueryDtoTypeOfRelatedTabelForFk(typeof(TEntity), entityFkName);
-
-            var dtoColumnNames = template.GetDtoColumnNames().Select(s => s.ToUpperFirsLetter()).ToList();
-            foreach (var dtoColumnName in dtoColumnNames)
-            {
-                if (!dtoColumnName.Contains("."))
-                {
-                    var exp = MappingService.GetPropertyMappingExpression(dtoColumnName, queryDtoOfLinkedTable, typeOfLinkedTable);
-                    template.ExpressionsOfDtoToEntityColNames.Add(dtoColumnName.ToLower(), exp);
-                }
-                else
-                {
-
-                }
-            }
-
-            return Repository.OptionsForForeignKey(typeOfLinkedTable, template);
-        }
-
-        public Type GetQueryDtoTypeOfRelatedTabelForFk(Type entity, string fkName)
-        {
-            var typeOfLinkedTable = Repository.GetTypeOfLinkedTableByForeignKeyName(entity, fkName);
-            var serviceRelatedToLinkedTable = entity.Assembly.GetCrudMasterServiceWithTEntity(typeOfLinkedTable);
-            return serviceRelatedToLinkedTable.BaseType?.GenericTypeArguments[0];
-        }
-
         public virtual void Create(TCommandDto dto)
         {
             ValidateDtoBeforeCreate(dto);

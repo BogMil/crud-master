@@ -54,8 +54,6 @@ namespace CrudMaster
             _entityToQueryDto.TryAdd(Map.To, Map.From);
             Map = new Map<TSource, TDestination>();
         }
-
-
     }
 
     public class Map<TSource, TDestination>
