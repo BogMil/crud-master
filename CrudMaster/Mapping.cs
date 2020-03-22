@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using AutoMapper;
 using CrudMaster.Extensions;
+using CrudMaster.Utils;
 using X.PagedList;
 using Expression = System.Linq.Expressions.Expression;
 
@@ -116,7 +117,7 @@ namespace CrudMaster
                     var parameters = (body as MethodCallExpression).Method.GetParameters();
                     foreach (var parameterInfo in parameters)
                     {
-                        if (!IsBaseType(parameterInfo.ParameterType))
+                        if (!BaseTypes.IsBaseType(parameterInfo.ParameterType))
                             throw new Exception("Do not make calls");
                     }
                     break;
@@ -129,18 +130,6 @@ namespace CrudMaster
                     break;
 
             }
-        }
-
-        private bool IsBaseType(Type parameterInfoParameterType)
-        {
-            List<Type> BaseTypes = new List<Type>()
-            {
-                typeof(string),
-                typeof(int),
-                typeof(float)
-            };
-
-            return BaseTypes.Contains(parameterInfoParameterType);
         }
     }
 }
