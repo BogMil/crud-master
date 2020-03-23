@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using CrudMaster.Extensions;
+using CrudMaster.RecordSelector;
+using CrudMaster.RecordSelector.States;
 using CrudMaster.Sorter;
 using CrudMaster.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using X.PagedList;
 
 namespace CrudMaster
@@ -15,43 +18,32 @@ namespace CrudMaster
         IPagedList<TEntity> Filter(Pager pager, Expression<Func<TEntity, bool>> filters, IOrderByProperties orderByProperties, IEnumerable<string> includings);
         TEntity Find(int id);
         void Create(TEntity entity);
-        TEntity CreateAndReturn(TEntity entity);
         void Update(TEntity entity);
-        TEntity UpdateAndReturn(TEntity entity);
         void Delete(int id);
-        int DeleteAndReturn(int id);
-        Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; }
-        TEntity NewDbSet();
+        TEntity GetNewDbSet();
+        IRecordSelectorInitialState<TEntity> RecordSelector();
     }
 
-    public abstract class GenericRepository<TEntity, TContext> :
+   
 
-        IGenericRepository<TEntity>
+    public abstract class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
         where TEntity : class
         where TContext : DbContext
     {
-        public Expression<Func<TEntity, bool>> CustomWherePredicate { get; set; } = null;
         protected TContext Db { get; private set; }
-
         protected GenericRepository(TContext context)
         {
             Db = context;
         }
 
-        public TEntity NewDbSet() => Db.CreateProxy<TEntity>();
+        public TEntity GetNewDbSet() => Db.CreateProxy<TEntity>();
+        public IRecordSelectorInitialState<TEntity> RecordSelector() => new RecordSelector<TEntity>(Db);
 
         public TEntity Find(int id) => Db.Set<TEntity>().Find(id);
-
-        public virtual int DeleteAndReturn(int id)
-        {
-            Delete(id);
-            return id;
-        }
 
         public virtual void Delete(int id)
         {
             var entity = Find(id);
-            ShouldDeleteEntity(entity);
             Db.Set<TEntity>().Remove(entity ?? throw new Exception($"Database is missing record with id:{id}"));
             Db.SaveChanges();
         }
@@ -60,15 +52,14 @@ namespace CrudMaster
             IOrderByProperties orderByProperties, IEnumerable<string> includings)
         {
             IQueryable<TEntity> listOfEntities = Db.Set<TEntity>();
-
+            //include
             listOfEntities = includings.Aggregate(listOfEntities, (current, including) => current.Include(including));
+            
 
+            //aply filters
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
-            listOfFilteredEntities = ApplyCustomCondition(listOfFilteredEntities);
 
-            if (CustomWherePredicate != null)
-                listOfFilteredEntities = listOfFilteredEntities.Where(CustomWherePredicate);
-
+            //orderBy
             var listOfOrderedEntities = listOfFilteredEntities;
             if (orderByProperties != null)
             {
@@ -77,62 +68,40 @@ namespace CrudMaster
                     : listOfFilteredEntities.OrderByDescending(orderByProperties.OrderByProperty);
             }
 
+
+            //page
             var pagedList = Paged(listOfOrderedEntities, pager);
             
             return pagedList;
         }
 
-        protected virtual IQueryable<TEntity> ApplyCustomCondition(IQueryable<TEntity> listOfFilteredEntities) => listOfFilteredEntities;
 
-        protected IPagedList<TEntity> Paged(IEnumerable<TEntity> listOfEntities, Pager pager)
+        protected IPagedList<TEntity> Paged(IQueryable<TEntity> listOfEntities, Pager pager)
         {
             if (pager.NumOfRowsPerPage < 0)
                 return listOfEntities.ToPagedList();
 
             return listOfEntities.ToPagedList(pager.CurrentPageNumber, pager.NumOfRowsPerPage);
         }
-
+        
         public virtual void Create(TEntity entity)
         {
-            entity = ModifyEntityBeforeCreate(entity);
             Db.Set<TEntity>().Add(entity);
             Db.SaveChanges();
-        }
-
-        public virtual TEntity CreateAndReturn(TEntity entity)
-        {
-            Create(entity);
-            return entity;
         }
 
         protected virtual TEntity ModifyEntityBeforeCreate(TEntity entity) => entity;
 
         public virtual void Update(TEntity entity)
         {
-            var id = GetPrimaryKeyValue(entity);
+            var id = GetPKValue(entity);
             var oldEntity = Db.Set<TEntity>().Find(id);
-            entity = ModifyUpdateSourceEntityBeforeUpdate(entity, oldEntity);
             Db.Entry(oldEntity).CurrentValues.SetValues(entity);
             Db.SaveChanges();
         }
 
-        public virtual TEntity UpdateAndReturn(TEntity entity)
-        {
-            var id = GetPrimaryKeyValue(entity);
-            var oldEntity = Db.Set<TEntity>().Find(id);
-            entity = ModifyUpdateSourceEntityBeforeUpdate(entity, oldEntity);
-            Db.Entry(oldEntity).CurrentValues.SetValues(entity);
-            Db.SaveChanges();
-
-            return oldEntity;
-
-        }
-
-        protected virtual TEntity ModifyUpdateSourceEntityBeforeUpdate(TEntity updateSourceEntity, TEntity oldEntity) => updateSourceEntity;
-
-        protected virtual void ShouldDeleteEntity(TEntity entity) { }
-
-        public virtual object GetPrimaryKeyValue(TEntity entity)
+        // ReSharper disable once InconsistentNaming
+        public virtual object GetPKValue(TEntity entity)
         {
             var pkName = Db.Entry(entity)
                 .Metadata

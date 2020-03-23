@@ -8,18 +8,11 @@ namespace CrudMaster
     public interface IGenericService<TQueryDto, TCommandDto>
     {
         void Create(TCommandDto dto);
-        TQueryDto CreateAndReturn(TCommandDto dto);
-        TModel CreateAndReturnModel<TModel>(TCommandDto dto);
         void Update(TCommandDto dto);
-        TQueryDto UpdateAndReturn(TCommandDto dto);
-        TModel UpdateAndReturnModel<TModel>(TCommandDto dto);
         void Delete(int id);
-        int DeleteAndReturn(int id);
         TQueryDto Find(int id);
         StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties);
         //Dictionary<string, string> OptionsForForeignKey(string fkName, string templateWithColumnNames, string concatenator);
-
-
     }
     public abstract class GenericService<TQueryDto, TCommandDto, TRepository, TEntity>
         : IGenericService<TQueryDto, TCommandDto>
@@ -45,6 +38,21 @@ namespace CrudMaster
             
             var entities = Repository.Filter(pager, wherePredicate, orderBy, includings);
 
+            //var res = Repository
+            //    .RecordSelector()
+            //    .Include(includings).;
+            //var records = Repository
+            //    .RecordSelector()
+            //    .Include()
+            //    .Where(wherePredicate)
+            //    .
+            //    .
+            //    .Where()
+            //    .OrderBy
+            //    .ThenBy
+            //    .thenBy
+            //    .Paginate();
+
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
 
@@ -53,36 +61,11 @@ namespace CrudMaster
             ValidateDtoBeforeCreate(dto);
             ValidateDtoBeforeUpdateOrCreate(dto);
 
-            var entity = Repository.NewDbSet();
+            var entity = Repository.GetNewDbSet();
 
             MappingService.Mapper.Map(dto, entity);
 
             Repository.Create(entity);
-        }
-
-        public virtual TQueryDto CreateAndReturn(TCommandDto dto)
-        {
-            ValidateDtoBeforeCreate(dto);
-            ValidateDtoBeforeUpdateOrCreate(dto);
-
-            var entity = Repository.NewDbSet();
-
-            MappingService.Mapper.Map(dto, entity);
-
-            var createdEntity = Repository.CreateAndReturn(entity);
-            return MappingService.Mapper.Map<TEntity, TQueryDto>(createdEntity);
-        }
-
-        public virtual TModel CreateAndReturnModel<TModel>(TCommandDto dto)
-        {
-            ValidateDtoBeforeCreate(dto);
-            ValidateDtoBeforeUpdateOrCreate(dto);
-
-            var entity = Repository.NewDbSet();
-            MappingService.Mapper.Map(dto, entity);
-
-            var createdEntity = Repository.CreateAndReturn(entity);
-            return MappingService.Mapper.Map<TEntity, TModel>(createdEntity);
         }
 
         public virtual void ValidateDtoBeforeCreate(TCommandDto dto)
@@ -95,36 +78,11 @@ namespace CrudMaster
             ValidateDtoBeforeUpdate(dto);
             ValidateDtoBeforeUpdateOrCreate(dto);
 
-            var entity = Repository.NewDbSet();
+            var entity = Repository.GetNewDbSet();
 
             MappingService.Mapper.Map(dto, entity);
 
             Repository.Update(entity);
-        }
-
-        public virtual TQueryDto UpdateAndReturn(TCommandDto dto)
-        {
-            ValidateDtoBeforeUpdate(dto);
-            ValidateDtoBeforeUpdateOrCreate(dto);
-
-            var entity = Repository.NewDbSet();
-            MappingService.Mapper.Map(dto, entity);
-
-            var upadtedEntity = Repository.UpdateAndReturn(entity);
-            return MappingService.Mapper.Map<TEntity, TQueryDto>(upadtedEntity);
-
-        }
-
-        public virtual TModel UpdateAndReturnModel<TModel>(TCommandDto dto)
-        {
-            ValidateDtoBeforeUpdate(dto);
-            ValidateDtoBeforeUpdateOrCreate(dto);
-
-            var entity = Repository.NewDbSet();
-            MappingService.Mapper.Map(dto, entity);
-
-            var createdEntity = Repository.UpdateAndReturn(entity);
-            return MappingService.Mapper.Map<TEntity, TModel>(createdEntity);
         }
 
         public virtual void ValidateDtoBeforeUpdate(TCommandDto dto)
@@ -143,11 +101,6 @@ namespace CrudMaster
         public virtual void ValidateDtoBeforeDelete(TCommandDto dto)
         {
 
-        }
-
-        public virtual int DeleteAndReturn(int id)
-        {
-            return Repository.DeleteAndReturn(id);
         }
 
         public TQueryDto Find(int id)

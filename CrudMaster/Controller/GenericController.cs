@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using CrudMaster.Sorter;
 using CrudMaster.Utils;
@@ -63,8 +64,8 @@ namespace CrudMaster.Controller
         {
             try
             {
-                var createdDto = Service.CreateAndReturn(dto);
-                return Json(createdDto);
+                Service.Create(dto);
+                return StatusCode(200);
             }
             catch (Exception e)
             {
@@ -78,8 +79,8 @@ namespace CrudMaster.Controller
         {
             try
             {
-                var createdDto = Service.UpdateAndReturn(dto);
-                return Json(createdDto);
+                Service.Update(dto);
+                return StatusCode(204);
             }
             catch (Exception e)
             {
@@ -92,8 +93,8 @@ namespace CrudMaster.Controller
         {
             try
             {
-                var deletedId = Service.DeleteAndReturn(id);
-                return Json(deletedId);
+                Service.Delete(id);
+                return StatusCode(204);
             }
             catch (Exception e)
             {
