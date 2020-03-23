@@ -1,4 +1,4 @@
-using CrudMaster.Repository;
+using CrudMaster;
 using CrudMasterApi.Entities;
 
 namespace CrudMasterApi.School

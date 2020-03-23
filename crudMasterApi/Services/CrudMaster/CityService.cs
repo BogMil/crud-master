@@ -1,4 +1,4 @@
-using CrudMaster.Service;
+using CrudMaster;
 using CrudMasterApi.Entities;
 using CrudMasterApi.Models.CrudMaster;
 using CrudMasterApi.Repositories;

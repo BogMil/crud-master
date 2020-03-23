@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using CrudMaster.Extensions;
-using CrudMaster.Filter;
-using CrudMaster.Repository;
+﻿using CrudMaster.Filter;
 using CrudMaster.Sorter;
+using CrudMaster.Utils;
 using X.PagedList;
 
-namespace CrudMaster.Service
+namespace CrudMaster
 {
     public interface IGenericService<TQueryDto, TCommandDto>
     {

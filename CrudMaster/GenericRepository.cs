@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using CrudMaster.Extensions;
 using CrudMaster.Sorter;
+using CrudMaster.Utils;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 
-namespace CrudMaster.Repository
+namespace CrudMaster
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {

@@ -1,4 +1,4 @@
-﻿namespace CrudMaster
+﻿namespace CrudMaster.Utils
 {
     public class Pager
     {

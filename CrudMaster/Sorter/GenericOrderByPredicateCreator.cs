@@ -1,4 +1,6 @@
-﻿namespace CrudMaster.Sorter
+﻿using CrudMaster.Utils;
+
+namespace CrudMaster.Sorter
 
 {
     public class GenericOrderByPredicateCreator<TEntity, TQueryDto> :

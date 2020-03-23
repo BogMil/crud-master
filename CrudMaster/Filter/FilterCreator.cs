@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
+using CrudMaster.Utils;
 using ExpressionBuilder;
+using static System.String;
 
 namespace CrudMaster.Filter
 {
@@ -19,21 +21,22 @@ namespace CrudMaster.Filter
     }
     public class FilterCreator<TEntity, TQueryDto> where TEntity : class where TQueryDto : class
     {
-        private FilterObject FilterObject { get; set; }=new FilterObject();
-        private readonly ParameterExpression _parameterExpression = Expression.Parameter(typeof(TEntity), "s");
+        private FilterObject FilterObject { get; }
+        private readonly ParameterExpression _parameterExpression;
         private readonly IExpressionBuilder _expressionBuilder;
 
         public FilterCreator(string filters)
         {
-            if(!String.IsNullOrEmpty(filters))
+            FilterObject=new FilterObject();
+            _parameterExpression = Expression.Parameter(typeof(TEntity), Constants.PARAMETER_EXPRESSION_NAME);
+
+
+            if (!IsNullOrEmpty(filters))
                 FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
             _expressionBuilder = new ExprBuilder();
         }
 
-        public Expression<Func<TEntity, bool>> Create()
-        {
-            return Create(FilterObject);
-        }
+        public Expression<Func<TEntity, bool>> Create() => Create(FilterObject);
 
         public Expression<Func<TEntity, bool>> Create(FilterObject filterObject)
         {
