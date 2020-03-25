@@ -45,20 +45,14 @@ namespace CrudMaster
                 .Where(new List<Expression<Func<TEntity, bool>>> {wherePredicate})
                 .ApplyOrders(orderInstructions)
                 .Paginate(pager);
-
             
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
 
         public virtual void Create(TCommandDto dto)
         {
-            ValidateDtoBeforeCreate(dto);
-            ValidateDtoBeforeUpdateOrCreate(dto);
-
             var entity = Repository.GetNewDbSet();
-
             MappingService.Mapper.Map(dto, entity);
-
             Repository.Create(entity);
         }
 

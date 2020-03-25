@@ -14,7 +14,7 @@ namespace CrudMaster
 
         public StringifiedExpression(LambdaExpression lambdaExpression)
         {
-            var strExp = lambdaExpression.ToString();
+            var strExp = lambdaExpression.ToString().Trim();
             _stringifiedExpression = Regex.Replace(strExp, @"\s+", "");
             _expressionParameter = GetExpressionParameterAsString();
             _parameterExpresionUsagesRegex
@@ -31,7 +31,7 @@ namespace CrudMaster
                 .ToHashSet();
         }
 
-        private List<string> GetPosibleSourcesOfIncludings() =>
+        private IEnumerable<string> GetPosibleSourcesOfIncludings() =>
             _parameterExpresionUsagesRegex
                 .Matches(_stringifiedExpression)
                 .Select(s => s.Value[^1] == '(' ? s.Value.Remove(s.Value.LastIndexOf('.')) : s.Value)
