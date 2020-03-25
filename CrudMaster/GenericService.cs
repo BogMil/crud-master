@@ -1,4 +1,8 @@
-﻿using CrudMaster.Filter;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using CrudMaster.Filter;
 using CrudMaster.Sorter;
 using CrudMaster.Utils;
 using X.PagedList;
@@ -35,24 +39,27 @@ namespace CrudMaster
             var orderBy = new GenericOrderByPredicateCreator<TEntity, TQueryDto>().GetPropertyObject(orderByProperties);
 
             var includings = MappingService.GetIncludings(typeof(TEntity), typeof(TQueryDto));
+
+            //var entities = Repository.Filter(pager, wherePredicate, orderBy, includings);
+
+            var nekiInt = new MappingExpression<TQueryDto, TEntity>("NekiInt").LambdaExpression;
+            var id = new MappingExpression<TQueryDto, TEntity>("Id").LambdaExpression;
+            var cityName = new MappingExpression<TQueryDto, TEntity>("CityName").LambdaExpression;
+
+            var orderList = new List<OrderInstruction>
+            {
+                new OrderInstruction(cityName),
+                //new OrderInstruction(id)
+            };
+
+            var entities = Repository
+                .RecordSelector()
+                .Include(includings)
+                .Where(new List<Expression<Func<TEntity, bool>>> {wherePredicate})
+                .ApplyOrders(orderList)
+                .Paginate(pager);
+
             
-            var entities = Repository.Filter(pager, wherePredicate, orderBy, includings);
-
-            //var res = Repository
-            //    .RecordSelector()
-            //    .Include(includings).;
-            //var records = Repository
-            //    .RecordSelector()
-            //    .Include()
-            //    .Where(wherePredicate)
-            //    .
-            //    .
-            //    .Where()
-            //    .OrderBy
-            //    .ThenBy
-            //    .thenBy
-            //    .Paginate();
-
             return MappingService.MapToStaticPageList<TEntity,TQueryDto>(entities);
         }
 

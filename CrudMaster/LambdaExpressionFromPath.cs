@@ -7,7 +7,6 @@ namespace CrudMaster
     public class LambdaExpressionFromPath<TSource>
     {
         public readonly Type ExpressionFuncReturnType;
-        //do not change name
         public readonly LambdaExpression LambdaExpression;
         public readonly ParameterExpression ParameterExpression;
         public readonly Expression Expression;

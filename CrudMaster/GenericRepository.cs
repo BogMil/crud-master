@@ -24,8 +24,6 @@ namespace CrudMaster
         IRecordSelectorInitialState<TEntity> RecordSelector();
     }
 
-   
-
     public abstract class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
         where TEntity : class
         where TContext : DbContext
@@ -60,23 +58,23 @@ namespace CrudMaster
             var listOfFilteredEntities = filters == null ? listOfEntities : listOfEntities.Where(filters);
 
             //orderBy
-            var listOfOrderedEntities = listOfFilteredEntities;
-            if (orderByProperties != null)
-            {
-                listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
-                    ? listOfFilteredEntities.OrderBy(orderByProperties.OrderByProperty)
-                    : listOfFilteredEntities.OrderByDescending(orderByProperties.OrderByProperty);
-            }
+            //var listOfOrderedEntities = listOfFilteredEntities;
+            //if (orderByProperties != null)
+            //{
+            //    listOfOrderedEntities = orderByProperties.OrderDirection == SortDirections.Ascending
+            //        ? listOfFilteredEntities.OrderBy(orderByProperties.OrderByProperty)
+            //        : listOfFilteredEntities.OrderByDescending(orderByProperties.OrderByProperty);
+            //}
 
-
-            //page
+            var cond = (Expression<Func<TEntity, dynamic>>)orderByProperties.x;
+            var listOfOrderedEntities = listOfFilteredEntities.OrderBy(cond);
             var pagedList = Paged(listOfOrderedEntities, pager);
             
             return pagedList;
         }
 
-
-        protected IPagedList<TEntity> Paged(IQueryable<TEntity> listOfEntities, Pager pager)
+        
+        protected IPagedList<TEntity> Paged(IEnumerable<TEntity> listOfEntities, Pager pager)
         {
             if (pager.NumOfRowsPerPage < 0)
                 return listOfEntities.ToPagedList();

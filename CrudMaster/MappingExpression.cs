@@ -16,6 +16,7 @@ namespace CrudMaster
         {
             var ms=new MappingService();
             LambdaExpression = ms.GetPropertyMappingExpression(destinationField, typeof(TDestination), typeof(TSource));
+
         }
 
         public LambdaExpression LambdaExpression { get; private set; }

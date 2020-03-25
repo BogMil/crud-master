@@ -55,9 +55,18 @@ namespace CrudMaster.RecordSelector
         public IPagedList<TEntity> Paginate(Pager pager)
             => _selectionResult.ToPagedList(pager.CurrentPageNumber, pager.NumOfRowsPerPage);
 
-        public IApplyOrdersState<TEntity> ApplyOrders()
+        public IApplyOrdersState<TEntity> ApplyOrders(List<OrderInstruction> orderByInstructions)
         {
-            throw new NotImplementedException();
+            var instructionsWithAppliers = OrderInstructionWithAppliersFactory.Create<TEntity>(orderByInstructions).ToList();
+
+            instructionsWithAppliers.ForEach(instruction =>
+            {
+                _selectionResult = instructionsWithAppliers.IsFirst(instruction) ?
+                    instruction.ApplyOrdering(_selectionResult)
+                    : instruction.ApplyOrdering((IOrderedQueryable<TEntity>)_selectionResult);
+            });
+
+            return this;
         }
     }
 }

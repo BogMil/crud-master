@@ -13,4 +13,8 @@
     <ProjectReference Include="..\CrudMaster.Utils\CrudMaster.Utils.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="OrderAppliers\" />
+  </ItemGroup>
+
 </Project>
