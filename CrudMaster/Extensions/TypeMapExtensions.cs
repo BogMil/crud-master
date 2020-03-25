@@ -8,7 +8,7 @@ namespace CrudMaster.Extensions
 {
     public static class TypeMapExtensions
     {
-        public static PropertyMap GetPropertyMapByDestinationPropertyName(this TypeMap typeMap, string destinationPropertyNameName)
+        public static PropertyMap GetPropertyMapForDestinationPropertyName(this TypeMap typeMap, string destinationPropertyNameName)
         {
             var propertyMapsForDestionationName= typeMap.PropertyMaps.Where(map => map.DestinationName == destinationPropertyNameName).ToList();
             if(propertyMapsForDestionationName.Count==0)
@@ -24,5 +24,15 @@ namespace CrudMaster.Extensions
                 .Where(propertyMap => propertyMap.CustomMapExpression != null)
                 .Select(propertyMap => propertyMap.CustomMapExpression)
                 .ToList();
+
+        public static IEnumerable<string> Extract(this TypeMap typeMap)
+        {
+            var res = new List<string>();
+
+            typeMap
+                .GetCustomMapExpressions()
+                .ForEach(s => res.AddRange(new StringifiedExpression(s).GetIncludings()));
+            return res.Distinct();
+        }
     }
 }

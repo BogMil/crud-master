@@ -8,5 +8,7 @@ namespace CrudMaster.RecordSelector.States
         IInclude<TEntity>,
         IWhere<TEntity>,
         IApplyOrders<TEntity>
-    { }
+    {
+
+    }
 }

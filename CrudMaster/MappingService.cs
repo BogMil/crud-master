@@ -14,7 +14,7 @@ namespace CrudMaster
         IMapper Mapper { get; set; }
         TypeMap GetTypeMapFor(Type sourceType, Type destinationType);
 
-        LambdaExpression GetPropertyMappingExpression(string destinationPropertyName,
+        LambdaExpression GetPropertyMapExpression(string destinationPropertyName,
             Type destinationType, Type sourceType);
 
         string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType);
@@ -28,62 +28,33 @@ namespace CrudMaster
     public class MappingService : IMappingService
     {
         public IMapper Mapper { get; set; }
-        private readonly IncludingsExtractor _includingsExtractor;
 
         public MappingService()
         {
             Mapper = Mapping.GetMapper();
-            _includingsExtractor = new IncludingsExtractor();
         }
 
-        public TDestination Map<TSource, TDestination>(TSource source) 
+        public TDestination Map<TSource, TDestination>(TSource source)
             => Mapper.Map<TSource, TDestination>(source);
 
-        public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source) 
+        public StaticPagedList<TDestination> MapToStaticPageList<TSource, TDestination>(IPagedList<TSource> source)
             => Mapper.Map<IPagedList<TSource>, StaticPagedList<TDestination>>((PagedList<TSource>)source);
 
         public IEnumerable<string> GetIncludings(Type sourceType, Type destinationType)
-        {
-            var mapping = Mapper.GetTypeMapFor(sourceType, destinationType);
-            return _includingsExtractor.Extract(mapping);
-        }
+            => Mapper.GetTypeMapFor(sourceType, destinationType).Extract();
 
-        public TypeMap GetTypeMapFor(Type sourceType, Type destinationType) 
+        public TypeMap GetTypeMapFor(Type sourceType, Type destinationType)
             => Mapper.GetTypeMapFor(sourceType, destinationType);
 
-
-        public LambdaExpression GetPropertyMappingExpression(string destinationPropertyName, Type destinationType, Type sourceType)
-        {
-            var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
-
-            var propertyMap = typeMap.GetPropertyMapByDestinationPropertyName(destinationPropertyName);
-            if (propertyMap.CustomMapExpression != null)
-                return propertyMap.CustomMapExpression;
-
-            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionFromPath<>).MakeGenericType(sourceType);
-            dynamic linkedTableExpressionCreator =
-                Activator.CreateInstance(sourceTypeLambdaExpressionCreatorType, destinationPropertyName);
-            return linkedTableExpressionCreator.LambdaExpression;
-        }
-
-        public LambdaExpressionFromPath<dynamic> GetExpressionCreatorForMappingFromDestinationPropToSourceProp(string destinationPropertyName, Type destinationType, Type sourceType)
-        {
-            //var typeMap = Mapper.GetTypeMapFor(sourceType, destinationType);
-
-            //var propertyMap = typeMap.GetPropertyMapByDestinationPropertyName(destinationPropertyName);
-            //if (propertyMap.CustomMapExpression != null)
-            //    return propertyMap.CustomMapExpression;
-
-            var sourceTypeLambdaExpressionCreatorType = typeof(LambdaExpressionFromPath<>).MakeGenericType(destinationType);
-            dynamic linkedTableExpressionCreator =
-                Activator.CreateInstance(sourceTypeLambdaExpressionCreatorType, destinationPropertyName);
-            return linkedTableExpressionCreator;
-        }
+        public LambdaExpression GetPropertyMapExpression(string destinationPropertyName, Type destinationType, Type sourceType)
+            => Mapper.GetTypeMapFor(sourceType, destinationType)
+                .GetPropertyMapForDestinationPropertyName(destinationPropertyName)
+                .GetSourceLambdaExpression();
 
         public string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var mapingExpression =
-                GetPropertyMappingExpression(destinationPropertyName, destinationType, sourceType);
+                GetPropertyMapExpression(destinationPropertyName, destinationType, sourceType);
             var x = mapingExpression.Compile();
 
             var expressionBodyString = mapingExpression.Body.ToString();
@@ -95,7 +66,7 @@ namespace CrudMaster
         public string GetFkNameInSourceForDestinationFkName(string destinationFkName, Type destinationType, Type sourceType)
         {
             var typeMap = GetTypeMapFor(sourceType, destinationType: destinationType);
-            var fkPropertyMap = typeMap.GetPropertyMapByDestinationPropertyName(destinationFkName);
+            var fkPropertyMap = typeMap.GetPropertyMapForDestinationPropertyName(destinationFkName);
             return fkPropertyMap.GetNameOfForeignKeyInSource();
         }
     }

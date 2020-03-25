@@ -4,6 +4,14 @@ using CrudMaster.Utils;
 
 namespace CrudMaster
 {
+    public static class LambdaExpressionFromPathFactory
+    {
+        public static dynamic CreateInRuntime(Type type, string path)
+        {
+            var concreteTypeLambdaExpessionFromPath = typeof(LambdaExpressionFromPath<>).MakeGenericType(type);
+            return Activator.CreateInstance(concreteTypeLambdaExpessionFromPath, path);
+        }
+    }
     public class LambdaExpressionFromPath<TSource>
     {
         public readonly Type ExpressionFuncReturnType;
@@ -19,7 +27,7 @@ namespace CrudMaster
         public LambdaExpressionFromPath(string fullPropertyPath)
         {
             FullPropertyPath = fullPropertyPath;
-            ParameterExpression = Expression.Parameter(typeof(TSource), Constants.PARAMETER_EXPRESSION_NAME);
+            ParameterExpression = ParameterExpressionFactory.Create<TSource>();
             var expressionBuiltFromString = CreateExpressionBuiltFromString();
             ExpressionFuncReturnType = expressionBuiltFromString.ExpressionsFuncReturnType;
             Expression = expressionBuiltFromString.Expression;

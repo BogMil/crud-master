@@ -19,7 +19,7 @@ namespace CrudMaster.RecordSelector
         where TEntity : class
     { }
     /// <summary>
-    /// RecordSelector should provide fluent API to encapsulate
+    /// RecordSelector should provide fluent interface to encapsulate
     /// flow of awailable operations over DbSet
     /// </summary>
     /// <typeparam name="TEntity">
@@ -55,16 +55,20 @@ namespace CrudMaster.RecordSelector
         public IPagedList<TEntity> Paginate(Pager pager)
             => _selectionResult.ToPagedList(pager.CurrentPageNumber, pager.NumOfRowsPerPage);
 
+        /// <summary>
+        /// Apply ordering of every instruction
+        /// Odrdering will be applied in order of instructions
+        /// </summary>
+        /// <param name="orderByInstructions"></param>
+        /// <returns></returns>
         public IApplyOrdersState<TEntity> ApplyOrders(List<OrderInstruction> orderByInstructions)
         {
             var instructionsWithAppliers = OrderInstructionWithAppliersFactory.Create<TEntity>(orderByInstructions).ToList();
-
-            instructionsWithAppliers.ForEach(instruction =>
-            {
-                _selectionResult = instructionsWithAppliers.IsFirst(instruction) ?
-                    instruction.ApplyOrdering(_selectionResult)
-                    : instruction.ApplyOrdering((IOrderedQueryable<TEntity>)_selectionResult);
-            });
+            _selectionResult = 
+                instructionsWithAppliers.Aggregate(_selectionResult, (current, instruction) =>
+                    instructionsWithAppliers.IsFirst(instruction)
+                        ? instruction.ApplyOrdering(current)
+                        : instruction.ApplyOrdering((IOrderedQueryable<TEntity>)current));
 
             return this;
         }

@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using CrudMaster.Sorter;
+using CrudMaster.Extensions;
 using CrudMaster.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,19 +46,18 @@ namespace CrudMaster.Controller
         }
 
         [HttpGet]
-        public virtual ActionResult Get([FromQuery] Pager pager, [FromQuery] OrderByProperties orderByProperties, [FromQuery] string filters)
+        public virtual ActionResult Get([FromQuery] Pager pager, [FromQuery] string orderProperties, [FromQuery] string filters)
         {
-            var data = Service.GetJqGridDataTest(pager, filters, orderByProperties);
-            var viewModel = new GenericViewModel<TQueryDto>
+            try
             {
-                CurrentPageNumber = data.PageNumber,
-                TotalNumberOfPages = data.PageCount,
-                TotalNumberOfRecords = data.TotalItemCount,
-                Records = data.ToList()
-            };
-
-            return Ok(viewModel);
+                return Ok(Service.Get(pager, filters, orderProperties).AsViewModel());
+            }
+            catch(Exception e)
+            {
+                return StatusCode(500, ErrorMessageCreator.GetMessageAsString(e));
+            }
         }
+            
 
         [HttpPost]
         public virtual ActionResult Post([FromBody] TCommandDto dto)
@@ -101,104 +101,5 @@ namespace CrudMaster.Controller
                 return StatusCode(StatusCodes.Status500InternalServerError, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
             }
         }
-        //public virtual ActionResult AjaxJqGrid(Pager pager,OrderByProperties orderByProperties,string filters)
-        //{
-        //    var data = Service.GetJqGridData(pager, filters,orderByProperties);
-        //    var jqGridViewModal = JqGridViewModelFactory(data);
-        //    return Json(jqGridViewModal);
-        //}
-
-
-        //public static TReturnViewModel JqGridViewModelFactory<TReturnViewModel, QueryDto>(StaticPagedList<QueryDto> listOfDto) 
-        //    where TReturnViewModel:GenericJqGridViewModel<QueryDto>,new()
-        //    where QueryDto :class
-        //{
-        //    var viewModel = new TReturnViewModel
-        //    {
-        //        Records = listOfDto.ToList(),
-        //        CurrentPageNumber = listOfDto.PageNumber,
-        //        TotalNumberOfPages = listOfDto.PageCount,
-        //        TotalNumberOfRecords = listOfDto.TotalItemCount,
-        //    };
-
-        //    return viewModel;
-        //}
-
-
-        //[HttpPost]
-        //public virtual ActionResult Create(TCommandDto dto)
-        //{
-        //    try
-        //    {
-        //        var createdDto = Service.CreateAndReturn(dto);
-        //        return Json(createdDto);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        //return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ErrorMessageCreator.GetMessageAsString(e));
-        //        return StatusCode(500, ErrorMessageCreator.GetMessageAsString(e));
-        //    }
-        //}
-
-        //[HttpPost]
-        //public virtual ActionResult Update(TCommandDto dto)
-        //{
-        //    try
-        //    {
-        //        var updatedDto = Service.UpdateAndReturn(dto);
-        //        return Json(updatedDto);
-        //    }
-        //    catch (Exception e)
-        //    {
-
-        //        return StatusCode(500, ErrorMessageCreator.GetMessageAsString(e));
-
-        //    }
-        //}
-
-        //[HttpPost]
-        //protected virtual ActionResult CreateAndReturnModel<TModel>(TCommandDto dto)
-        //{
-        //    try
-        //    {
-        //        var createdDto = Service.CreateAndReturnModel<TModel>(dto);
-        //        return Json(createdDto);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        //return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
-        //        return StatusCode(500, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
-
-        //    }
-        //}
-
-        //[HttpPost]
-        //protected virtual ActionResult UpdateAndReturnModel<TModel>(TCommandDto dto)
-        //{
-        //    try
-        //    {
-        //        var createdDto = Service.UpdateAndReturnModel<TModel>(dto);
-        //        return Json(createdDto);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        //return new HttpStatusCodeResult(HttpStatusCode.InternalServerError, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
-        //        return StatusCode(500, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
-        //    }
-        //}
-
-        //[HttpPost]
-        //public virtual ActionResult DeleteAndReturn(int id)
-        //{
-        //    try
-        //    {
-        //        var deletedId = Service.DeleteAndReturn(id);
-        //        return Json(deletedId);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ErrorMessageCreator.GetMessageAsHttpsStatusCode(e));
-        //    }
-        //}
     }
 }

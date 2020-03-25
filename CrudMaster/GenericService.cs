@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using CrudMaster.Filter;
-using CrudMaster.Sorter;
 using CrudMaster.Utils;
 using X.PagedList;
 
@@ -15,7 +15,7 @@ namespace CrudMaster
         void Update(TCommandDto dto);
         void Delete(int id);
         TQueryDto Find(int id);
-        StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties);
+        StaticPagedList<TQueryDto> Get(Pager pager, string filters, string orderProperties);
         //Dictionary<string, string> OptionsForForeignKey(string fkName, string templateWithColumnNames, string concatenator);
     }
     public abstract class GenericService<TQueryDto, TCommandDto, TRepository, TEntity>
@@ -33,30 +33,17 @@ namespace CrudMaster
             MappingService = new MappingService();
         }
 
-        public virtual StaticPagedList<TQueryDto> GetJqGridDataTest(Pager pager, string filters, OrderByProperties orderByProperties)
+        public virtual StaticPagedList<TQueryDto> Get(Pager pager, string filters, string orderProperties)
         {
-            var wherePredicate = FilterFactory.Create<TEntity, TQueryDto>(filters);
-            var orderBy = new GenericOrderByPredicateCreator<TEntity, TQueryDto>().GetPropertyObject(orderByProperties);
-
+            var wherePredicate = WherePredicateFactory.Create<TEntity, TQueryDto>(filters);
+            var orderInstructions = OrderInstructionsFactory.Create<TEntity, TQueryDto>(orderProperties);
             var includings = MappingService.GetIncludings(typeof(TEntity), typeof(TQueryDto));
-
-            //var entities = Repository.Filter(pager, wherePredicate, orderBy, includings);
-
-            var nekiInt = new MappingExpression<TQueryDto, TEntity>("NekiInt").LambdaExpression;
-            var id = new MappingExpression<TQueryDto, TEntity>("Id").LambdaExpression;
-            var cityName = new MappingExpression<TQueryDto, TEntity>("CityName").LambdaExpression;
-
-            var orderList = new List<OrderInstruction>
-            {
-                new OrderInstruction(cityName),
-                //new OrderInstruction(id)
-            };
 
             var entities = Repository
                 .RecordSelector()
                 .Include(includings)
                 .Where(new List<Expression<Func<TEntity, bool>>> {wherePredicate})
-                .ApplyOrders(orderList)
+                .ApplyOrders(orderInstructions)
                 .Paginate(pager);
 
             
@@ -114,6 +101,29 @@ namespace CrudMaster
         {
             var entity = Repository.Find(id);
             return MappingService.Mapper.Map<TEntity, TQueryDto>(entity);
+        }
+    }
+
+    public static class OrderInstructionsFactory
+    {
+        public static List<OrderInstruction> Create<TEntity, TQueryDto>(string orderProperties)
+        {
+            if(string.IsNullOrEmpty(orderProperties) || string.IsNullOrWhiteSpace(orderProperties))
+                return new List<OrderInstruction>();
+
+            var listOfOrderPropertieses = JsonSerializer.Deserialize<List<OrderProperties>>(orderProperties);
+
+            var ms = new MappingService();
+            
+
+            return listOfOrderPropertieses.Select(
+                orderProperty =>
+                {
+                    var lambdaExpression = ms.GetPropertyMapExpression(orderProperty.Column, typeof(TQueryDto), typeof(TEntity));
+                    return new OrderInstruction(
+                        lambdaExpression,
+                        orderProperty.Direction);
+                }).ToList();
         }
     }
 }

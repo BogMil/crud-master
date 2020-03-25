@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace CrudMaster.Filter
+namespace CrudMaster.Utils
 {
     public class FilterObject
     {

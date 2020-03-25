@@ -18,7 +18,16 @@ namespace CrudMaster.Extensions
                 throw new Exception("Not foreign key");
 
             return fkName;
+        }
 
+        public static LambdaExpression GetSourceLambdaExpression(this PropertyMap propertyMap)
+        {
+            if (propertyMap.CustomMapExpression != null)
+                return propertyMap.CustomMapExpression;
+
+            return LambdaExpressionFromPathFactory
+                .CreateInRuntime(propertyMap.TypeMap.SourceType, propertyMap.DestinationName)
+                .LambdaExpression;
         }
     }
 }
