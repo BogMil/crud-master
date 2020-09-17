@@ -43,90 +43,52 @@ namespace CrudMaster
 
         public IEnumerable<string> GetIncludings(Type sourceType, Type destinationType)
         {
-            var userDefinedMapExpressions = GetUserDefinedMapExpressions(sourceType, destinationType);
-            var res = new List<string>();
-            userDefinedMapExpressions.ForEach(s =>
-            {
-
-                res.AddRange(new StringifiedExpression(s).GetIncludings());
-            });
-            var getInc = _GetUserDefinedMapExpressions(sourceType, destinationType);
-            return getInc.Distinct();
-        }
-
-        private List<LambdaExpression> GetUserDefinedMapExpressions(Type sourceType, Type destinationType)
-        {
-            var typeMap = GetTypeMapFor(sourceType, destinationType);
-            var userDefinedPropertyMaps = typeMap.PropertyMaps
-                .Where(propertyMap => propertyMap.CustomMapExpression != null)
-                .Select(propertyMap => propertyMap.CustomMapExpression)
-                .ToList();
-
-            return userDefinedPropertyMaps;
-        }
-
-        private List<string> _GetUserDefinedMapExpressions(Type sourceType, Type destinationType)
-        {
-            var _including = new List<string>();
-
-            var userDefinedPropertyMaps = 
-                GetTypeMapFor(sourceType, destinationType).PropertyMaps
-                .Where(propertyMap => propertyMap.CustomMapExpression != null)
-                .ToList();
-
-            foreach (var userDefinedPropertyMap in userDefinedPropertyMaps)
-            {
-                if (!BaseTypes.IsBaseType(userDefinedPropertyMap.DestinationType))
-                {
-                    var nestedUserDefinedMapExpressions =
-                        _GetUserDefinedMapExpressionsWithPrefix(userDefinedPropertyMap.SourceType,
-                            userDefinedPropertyMap.DestinationType,"");
-
-                    _including.AddRange(nestedUserDefinedMapExpressions);
-                }
-                else
-                {
-                    _including.AddRange(new StringifiedExpression(userDefinedPropertyMap.CustomMapExpression).GetIncludings());
-
-                }
-            }
-
-            return _including.Distinct().ToList();
-        }
-
-        private List<string> _GetUserDefinedMapExpressionsWithPrefix(Type sourceType, Type destinationType,string prefix)
-        {
-            var _including = new List<string>();
-
             var userDefinedPropertyMaps =
-                GetTypeMapFor(sourceType, destinationType).PropertyMaps
-                    .Where(propertyMap => propertyMap.CustomMapExpression != null)
-                    .ToList();
+                GetUserDefinedPropertyMaps(sourceType, destinationType);
 
-            foreach (var userDefinedPropertyMap in userDefinedPropertyMaps)
+            var includings = new List<string>();
+
+            foreach (var pm in userDefinedPropertyMaps)
             {
-                if (!BaseTypes.IsBaseType(userDefinedPropertyMap.DestinationType))
-                {
-                    var newPrefix = prefix != "" ? prefix + "." + sourceType.Name : sourceType.Name;
-                    var nestedUserDefinedMapExpressions =
-                        _GetUserDefinedMapExpressionsWithPrefix(userDefinedPropertyMap.SourceType,
-                            userDefinedPropertyMap.DestinationType,newPrefix);
-
-                    _including.AddRange(nestedUserDefinedMapExpressions);
-                }
-                else
-                {
-                    var x=new StringifiedExpression(userDefinedPropertyMap.CustomMapExpression).GetIncludings();
-                    _including.AddRange(x);
-                }
+                var pmIncludings = GetIncludingsForPropertyMap(pm);
+                includings.AddRange(pmIncludings);
             }
-            var z= _including.Count>0 
-                ? prefix!="" 
-                    ?_including.Select(s=>prefix+"."+s).ToList() 
-                    : _including.ToList()
-                : new List<string>{prefix+"."+sourceType.Name};
+
+            return includings.Distinct().ToList();
+        }
+        
+        private List<string> GetIncludingsWithPrefix(Type sourceType, Type destinationType, string prefix = "")
+        {
+            var userDefinedPropertyMaps = GetUserDefinedPropertyMaps(sourceType,destinationType);
+            var includings = new List<string>();
+            foreach (var pm in userDefinedPropertyMaps)
+            {
+                var newPrefix = prefix != "" ? prefix + "." + sourceType.Name : sourceType.Name;
+                var pmIncludings= GetIncludingsForPropertyMap(pm, newPrefix);
+                includings.AddRange(pmIncludings);
+            }
+            var z = includings.Count > 0
+                ? prefix != ""
+                    ? includings.Select(s => prefix + "." + s).ToList()
+                    : includings.ToList()
+                : new List<string> { prefix + "." + sourceType.Name };
 
             return z.Distinct().ToList();
+        }
+
+        private List<PropertyMap> GetUserDefinedPropertyMaps(Type sourceType, Type destinationType)
+        {
+            return GetTypeMapFor(sourceType, destinationType).PropertyMaps
+                .Where(propertyMap => propertyMap.CustomMapExpression != null)
+                .ToList();
+        }
+
+        private List<string> GetIncludingsForPropertyMap(PropertyMap pm,string prefix="")
+        {
+            if (!BaseTypes.IsBaseType(pm.DestinationType))
+                return GetIncludingsWithPrefix(pm.SourceType, pm.DestinationType, prefix);
+            else
+                return new StringifiedExpression(pm.CustomMapExpression).GetIncludings().ToList();
         }
 
         public TypeMap GetTypeMapFor(Type sourceType, Type destinationType)
@@ -145,10 +107,10 @@ namespace CrudMaster
         public LambdaExpression GetPropertyMapExpression(string destinationPropertyName, Type destinationType, Type sourceType)
         {
             var typeMap = GetTypeMapFor(sourceType, destinationType);
-            var propertyMap = GetPropertyMapForDestinationPropertyName(typeMap,destinationPropertyName);
+            var propertyMap = GetPropertyMapForDestinationPropertyName(typeMap, destinationPropertyName);
             return GetSourceLambdaExpression(propertyMap);
         }
-            
+
 
         public string GetPropertyPathInSourceType(string destinationPropertyName, Type destinationType, Type sourceType)
         {
@@ -165,7 +127,7 @@ namespace CrudMaster
         public string GetFkNameInSourceForDestinationFkName(string destinationFkName, Type destinationType, Type sourceType)
         {
             var typeMap = GetTypeMapFor(sourceType, destinationType: destinationType);
-            var fkPropertyMap = GetPropertyMapForDestinationPropertyName(typeMap,destinationFkName);
+            var fkPropertyMap = GetPropertyMapForDestinationPropertyName(typeMap, destinationFkName);
             return fkPropertyMap.GetNameOfForeignKeyInSource();
         }
 
