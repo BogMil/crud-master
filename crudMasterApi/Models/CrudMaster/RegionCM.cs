@@ -1,4 +1,11 @@
-﻿namespace CrudMasterApi.Models.CrudMaster
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using AutoMapper;
+using CrudMaster;
+using CrudMasterApi.Entities;
+
+namespace CrudMasterApi.Models.CrudMaster
 {
     public class RegionBase
     {
@@ -10,40 +17,24 @@
 
     public class RegionQueryDto : RegionBase
     {
+        public string test { get; set; }
     }
 
     public class RegionCommandDto : RegionBase
     {
     }
 
-    //public class RegionMappingProfile : Profile
-    //{
-    //    public RegionMappingProfile()
-    //    {
-    //        CreateMap<Region, RegionQueryDto>()
-    //            .ForMember(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
+    public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
+    {
+        public override void MapToQueryDtoFromEntity(IMapTo<Region, RegionQueryDto> map)
+        {
+            map.To(d => d.NekiInt).From(s => s.TestInt)
+                .To(d => d.test).From(s => s.Name+"-"+ s.Name);
+        }
 
-    //        CreateMap<RegionCommandDto, Region>()
-    //            .ForMember(s => s.Cities, o => o.Ignore())
-    //            .ForMember(s => s.TestInt, o => o.MapFrom(s=>s.NekiInt));
-
-    //        CreateMap<PagedList<Region>, StaticPagedList<RegionQueryDto>>()
-    //            .ConvertUsing<PagedListConverter<Region, RegionQueryDto>>();
-    //    }
-    //}
-
-    //public class RegionMappingProfile : CrudMasterMappingProfile<RegionQueryDto, RegionCommandDto, Region>
-    //{
-    //    public override void PopulateMps(Dictionary<Expression<Func<RegionQueryDto, dynamic>>, Expression<Action<IMemberConfigurationExpression<Region, RegionQueryDto, dynamic>>>> entityToQueryDto)
-    //    {
-    //        entityToQueryDto.Add(x => x.NekiInt, o => o.MapFrom(s => s.TestInt));
-
-    //        CommandDtoToEntity.Add(s => s.Cities, o => o.Ignore());
-    //        CommandDtoToEntity.Add(s => s.TestInt, o => o.MapFrom(d => d.NekiInt));
-    //    }
-
-    //    public override void ConfigureEntityToQueryDtoMap(IMapFrom<Region, RegionQueryDto> map)
-    //    {
-    //    }
-    //}
+        public override void MapToEntityFromCommandDto(IMapTo<RegionCommandDto, Region> map)
+        {
+            map.To(d => d.TestInt).From(s => s.NekiInt);
+        }
+    }
 }

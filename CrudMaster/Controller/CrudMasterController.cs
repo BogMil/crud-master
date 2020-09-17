@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CrudMaster.Controller
 {
 
-    public class GenericController<TService, TQueryDto, TCommandDto> 
+    public class CrudMasterController<TService, TQueryDto, TCommandDto> 
         : Microsoft.AspNetCore.Mvc.Controller
 
         where TQueryDto : class
@@ -20,7 +20,7 @@ namespace CrudMaster.Controller
     {
         protected TService Service;
 
-        public GenericController(TService service)
+        public CrudMasterController(TService service)
         {
             Service = service;
         }

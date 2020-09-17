@@ -7,7 +7,7 @@ namespace CrudMasterApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RegionController: GenericController<IRegionService, RegionQueryDto, RegionCommandDto>
+    public class RegionController: CrudMasterController<IRegionService, RegionQueryDto, RegionCommandDto>
     {
         public RegionController(IRegionService service) : base(service) {}
     }

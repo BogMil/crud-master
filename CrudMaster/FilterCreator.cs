@@ -8,10 +8,8 @@ using CrudMaster.Utils;
 using ExpressionBuilder;
 using static System.String;
 
-namespace CrudMaster.Filter
+namespace CrudMaster
 {
-
-
     public static class WherePredicateFactory
     {
         public static Expression<Func<TEntity, bool>> Create<TEntity, TQueryDto>(string filters)
@@ -24,22 +22,22 @@ namespace CrudMaster.Filter
         where TEntity : class 
         where TQueryDto : class
     {
-        private FilterObject FilterObject { get; }
+        private FilterNode FilterNode{ get; }
         private readonly ParameterExpression _parameterExpression;
         private readonly IExpressionBuilder _expressionBuilder;
 
         public WherePredicateCreator(string filters)
         {
-            FilterObject = new FilterObject();
+            FilterNode = new FilterNode();
             _expressionBuilder = new ExprBuilder();
             _parameterExpression = ParameterExpressionFactory.Create<TEntity>();
 
             if (!IsNullOrEmpty(filters))
-                FilterObject = JsonSerializer.Deserialize<FilterObject>(filters);
+                FilterNode = JsonSerializer.Deserialize<FilterNode>(filters);
         }
 
-        public Expression<Func<TEntity, bool>> Create() => Create(FilterObject);
-        public Expression<Func<TEntity, bool>> Create(FilterObject filterObject)
+        public Expression<Func<TEntity, bool>> Create() => Create(FilterNode);
+        public Expression<Func<TEntity, bool>> Create(FilterNode filterObject)
         {
             var expressionsToCombine = new List<Expression>();
 

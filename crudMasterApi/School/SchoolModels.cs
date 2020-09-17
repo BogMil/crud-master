@@ -24,7 +24,7 @@ namespace CrudMasterApi.School
     {
         public CityQueryDto City { get; set; }
         public string CityName { get; set; }
-        public string RegionName { get; set; }
+        //public string RegionName { get; set; }
 
     }
 
@@ -34,10 +34,12 @@ namespace CrudMasterApi.School
     {
         public override void MapToQueryDtoFromEntity(IMapTo<Entities.School, SchoolQueryDto> map)
         {
-            
+
             map.To(s => s.DtoCityId).From(s => s.CityId)
-                .To(s => s.CityName).From(s => s.City.Name +" " + s.CityId.ToString() + "ski" + s.City.Name + "ski")
-                .To(s => s.RegionName).From(s => s.City.Region.Name); 
+                .To(s => s.CityName).From(s => s.City.Name + " " + s.CityId.ToString() + "ski" + s.City.Name + "ski")
+            //.To(s=>s.RegionName).From(d=>d.City.Region.Name);
+
+            .To(s => s.City).From(s => s.City);
         }
 
         public override void MapToEntityFromCommandDto(IMapTo<SchoolCommandDto,Entities.School> map)

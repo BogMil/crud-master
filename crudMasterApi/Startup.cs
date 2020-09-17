@@ -41,7 +41,9 @@ namespace CrudMasterApi
             //services.AddSingleton(new AutoMapperConfiguration().Configure());
             //services.AddSingleton<TranslationTransformer>();
 
-            services.AddDbContext<AccountingContext>(options => options.UseLazyLoadingProxies().UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
+            services.AddDbContext<AccountingContext>(options => options
+                //.UseLazyLoadingProxies()
+                .UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]));
 
             services.AddTransient<ICityService, CityService>();
             services.AddTransient<ICityRepository, CityRepository>();

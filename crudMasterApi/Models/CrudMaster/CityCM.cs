@@ -17,8 +17,8 @@ namespace CrudMasterApi.Models.CrudMaster
 
     public class CityQueryDto : CityBase
     {
-        //public RegionQueryDto Region { get; set; }
-        public string RegionName { get; set; }
+        public RegionQueryDto Region { get; set; }
+        //public string RegionName { get; set; }
     }
 
     public class CityCommandDto : CityBase { }
@@ -46,7 +46,8 @@ namespace CrudMasterApi.Models.CrudMaster
 
         public override void MapToQueryDtoFromEntity(IMapTo<City, CityQueryDto> map)
         {
-            map.To(d => d.RegionName).From(s => s.Region.Name);
+            //map.To(d => d.RegionName).From(s => s.Region.Name);
+            map.To(d => d.Region).From(s => s.Region);
         }
 
         public override void MapToEntityFromCommandDto(IMapTo<CityCommandDto, City> map)

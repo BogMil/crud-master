@@ -12,6 +12,7 @@ namespace CrudMaster
             return Activator.CreateInstance(concreteTypeLambdaExpessionFromPath, path);
         }
     }
+
     public class LambdaExpressionFromPath<TSource>
     {
         public readonly Type ExpressionFuncReturnType;

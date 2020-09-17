@@ -18,21 +18,5 @@ namespace CrudMaster.Extensions
 
             return propertyMapsForDestionationName.First();
         }
-
-        public static List<LambdaExpression> GetCustomMapExpressions(this TypeMap typeMap)=>
-            typeMap.PropertyMaps
-                .Where(propertyMap => propertyMap.CustomMapExpression != null)
-                .Select(propertyMap => propertyMap.CustomMapExpression)
-                .ToList();
-
-        public static IEnumerable<string> Extract(this TypeMap typeMap)
-        {
-            var res = new List<string>();
-
-            typeMap
-                .GetCustomMapExpressions()
-                .ForEach(s => res.AddRange(new StringifiedExpression(s).GetIncludings()));
-            return res.Distinct();
-        }
     }
 }

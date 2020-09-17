@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
-using CrudMaster.Filter;
 using CrudMaster.Utils;
 using X.PagedList;
 
@@ -102,22 +101,38 @@ namespace CrudMaster
     {
         public static List<OrderInstruction> Create<TEntity, TQueryDto>(string orderProperties)
         {
-            if(string.IsNullOrEmpty(orderProperties) || string.IsNullOrWhiteSpace(orderProperties))
+            if(!AreOrderPropertiesValid(orderProperties))
                 return new List<OrderInstruction>();
 
-            var listOfOrderPropertieses = JsonSerializer.Deserialize<List<OrderProperties>>(orderProperties);
+            var listOfOrderProperties= JsonSerializer.Deserialize<List<OrderProperties>>(orderProperties);
+            return new OrderPropertyMapper()
+                .MapToListOfOrderInstructions<TEntity, TQueryDto>(listOfOrderProperties);
+        }
 
-            var ms = new MappingService();
-            
+        private static bool AreOrderPropertiesValid(string orderProperties)
+            =>!(string.IsNullOrEmpty(orderProperties) || string.IsNullOrWhiteSpace(orderProperties));
+        
+    }
 
-            return listOfOrderPropertieses.Select(
-                orderProperty =>
-                {
-                    var lambdaExpression = ms.GetPropertyMapExpression(orderProperty.Column, typeof(TQueryDto), typeof(TEntity));
-                    return new OrderInstruction(
-                        lambdaExpression,
-                        orderProperty.Direction);
-                }).ToList();
+    public class OrderPropertyMapper
+    {
+        private readonly MappingService _ms;
+
+        public OrderPropertyMapper()
+        {
+            _ms = new MappingService();
+        }
+
+        public List<OrderInstruction> MapToListOfOrderInstructions<TEntity, TQueryDto>(List<OrderProperties> listOfOrderProperties)
+            =>listOfOrderProperties.Select(MapToOrderInstruction<TEntity, TQueryDto>).ToList();
+
+        private OrderInstruction MapToOrderInstruction<TEntity, TQueryDto>(OrderProperties orderProperties)
+        {
+            var lambdaExpression =
+                _ms.GetPropertyMapExpression(orderProperties.Column, typeof(TQueryDto), typeof(TEntity));
+            return new OrderInstruction(
+                lambdaExpression,
+                orderProperties.Direction);
         }
     }
 }
